@@ -106,30 +106,30 @@ es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
 
 {-Ejercicio 1-}
 
-foldPersonaje :: (Posicion -> String -> b) -> (Direccion -> b -> b) -> (b -> b) -> Personaje -> b
+foldPersonaje :: (Posición -> String -> b) -> (Dirección -> b -> b) -> (b -> b) -> Personaje -> b
 foldPersonaje cBase cMueve cMuere p = case p of
                                       Personaje p s -> cBase p s
-                                      Mueve p d -> cMueve d f p
-                                      Muere p -> cMuere f p
+                                      Mueve p d -> cMueve d (f p)
+                                      Muere p -> cMuere (f p)
                                       where f = foldPersonaje cBase cMueve cMuere
 
-foldObjeto :: (Posicion -> String -> b) -> (Personaje -> b -> b) -> (b -> b) -> Objeto -> b
+foldObjeto :: (Posición -> String -> b) -> (Personaje -> b -> b) -> (b -> b) -> Objeto -> b
 foldObjeto cBase cTomado cDestruido obj = case obj of
                                           Objeto p s -> cBase p s
-                                          Tomado o p -> cTomado p f o
-                                          EsDestruido o -> cDestruido f o
+                                          Tomado o p -> cTomado p (f o)
+                                          EsDestruido o -> cDestruido (f o)
                                           where f = foldObjeto cBase cTomado cDestruido
 
 {-Ejercicio 2-}
 
-posición_personaje :: Personaje -> Posicion
+posición_personaje :: Personaje -> Posición
 posición_personaje = foldPersonaje (const) (flip siguiente_posicion) (id)
---El caso base es const porque no interesa el nombre y en Personaje esta primero la posicion
+--El caso base es const porque no interesa el nombre y en Personaje esta primero la posición
 --Por def de const: const p s = (\p -> _ -> p) p s = p
---Uso flip siguiente_posicion porque en la recursion esta primero la direccion y despues el llamado recursivo
+--Uso flip siguiente_posicion porque en la recursion esta primero la dirección y despues el llamado recursivo
 
-nombre_objeto :: ?
-nombre_objeto = ?
+nombre_objeto :: Objeto -> String
+nombre_objeto = foldObjeto (flip const) (flip const) (id) --flip porque quiero que me devuelva el argumento de la derecha
 
 {-Ejercicio 3-}
 
