@@ -107,17 +107,17 @@ es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
 {-Ejercicio 1-}
 
 foldPersonaje :: (Posición -> String -> b) -> (Dirección -> b -> b) -> (b -> b) -> Personaje -> b
-foldPersonaje cBase cMueve cMuere p = case p of
-                                      Personaje p s -> cBase p s
-                                      Mueve p d -> cMueve d (f p)
-                                      Muere p -> cMuere (f p)
+foldPersonaje cBase cMueve cMuere p = case per of
+                                      Personaje pos nombre -> cBase pos nombre
+                                      Mueve personaje dir -> cMueve dir (f personaje)
+                                      Muere personaje -> cMuere (f personaje)
                                       where f = foldPersonaje cBase cMueve cMuere
 
 foldObjeto :: (Posición -> String -> b) -> (Personaje -> b -> b) -> (b -> b) -> Objeto -> b
 foldObjeto cBase cTomado cDestruido obj = case obj of
-                                          Objeto p s -> cBase p s
-                                          Tomado o p -> cTomado p (f o)
-                                          EsDestruido o -> cDestruido (f o)
+                                          Objeto pos nombre -> cBase pos nombre
+                                          Tomado objeto personaje -> cTomado personaje (f objeto)
+                                          EsDestruido objeto -> cDestruido (f objeto)
                                           where f = foldObjeto cBase cTomado cDestruido
 
 {-Ejercicio 2-}
