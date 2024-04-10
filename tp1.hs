@@ -106,16 +106,26 @@ es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
 
 {-Ejercicio 1-}
 
-foldPersonaje :: ?
-foldPersonaje = ?
+foldPersonaje :: (Posicion -> String -> b) -> (Direccion -> b -> b) -> (b -> b) -> Personaje -> b
+foldPersonaje cBase cMueve cMuere p = case p of
+                                      Personaje p s -> cBase p s
+                                      Mueve p d -> cMueve d f p
+                                      Muere p -> cMuere f p
+                                      where f = foldPersonaje cBase cMueve cMuere
 
-foldObjeto :: ?
-foldObjeto = ?
+foldObjeto :: (Posicion -> String -> b) -> (Personaje -> b -> b) -> (b -> b) -> Objeto -> b
+foldObjeto cBase cTomado cDestruido obj = case obj of
+                                          Objeto p s -> cBase p s
+                                          Tomado o p -> cTomado p f o
+                                          EsDestruido o -> cDestruido f o
+                                          where f = foldObjeto cBase cTomado cDestruido
 
 {-Ejercicio 2-}
 
-posición_personaje :: ?
-posición_personaje = ?
+posición_personaje :: Personaje -> Posicion
+posición_personaje = foldPersonaje (const) (\d r -> siguiente_posicion r d) (id)
+--El caso base es const porque no interesa el nombre y en Personaje esta primero la posicion
+--Por def de const: const p s = (\p -> _ -> p) p s = p
 
 nombre_objeto :: ?
 nombre_objeto = ?
