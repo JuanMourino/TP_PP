@@ -123,9 +123,10 @@ foldObjeto cBase cTomado cDestruido obj = case obj of
 {-Ejercicio 2-}
 
 posición_personaje :: Personaje -> Posicion
-posición_personaje = foldPersonaje (const) (\d r -> siguiente_posicion r d) (id)
+posición_personaje = foldPersonaje (const) (flip siguiente_posicion) (id)
 --El caso base es const porque no interesa el nombre y en Personaje esta primero la posicion
 --Por def de const: const p s = (\p -> _ -> p) p s = p
+--Uso flip siguiente_posicion porque en la recursion esta primero la direccion y despues el llamado recursivo
 
 nombre_objeto :: ?
 nombre_objeto = ?
