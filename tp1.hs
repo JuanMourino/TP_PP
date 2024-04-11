@@ -132,6 +132,10 @@ nombre_objeto :: Objeto -> String
 nombre_objeto = foldObjeto (flip const) (flip const) (id) --flip porque quiero que me devuelva el argumento de la derecha
 
 {-Ejercicio 3-}
+{-Idea: Como el universo es una lista podemos usar foldr y usar las funciones es_un_objeto y es_un_personaje respectivamente
+Despues simplemente usar (:) como funcion del foldr para agregarlos a todos en una lista, caso base []
+Podemos usar objeto_de y personaje_de para que la lista devuelta sea de tipo Objeto o Personaje y no de tipo Either
+No importa el orden para la consigna YEY-}
 
 objetos_en :: ?
 objetos_en = ?
@@ -140,11 +144,21 @@ personajes_en :: ?
 personajes_en = ?
 
 {-Ejercicio 4-}
+{-Idea: va revisando el universo, si vemos un objeto lo analizamos con foldObjeto (si esta destruido o en posesion de otra persona), 
+filtramos todas sus demas apariciones del universo, si la persona que lo posee es la que se nos paso como parametro, lo agregamos a la 
+lista que devuelve la funcion
+En todos los casos seguimos con la recursion sobre el universo (afectado o no por un filtro)-}
 
 objetos_en_posesión_de :: ?
 objetos_en_posesión_de = ?
 
 {-Ejercicio 5-}
+{-Idea: Usar una funcion auxiliar de distancia para los objetos, posiblemente una para obtener la posicion(usando foldObjeto)
+Usar una funcion auxiliar para hallar la posicion del personaje en cuestion
+Como asumimos que hay al menos un objeto podemos usar foldr1 yey
+Problema, si el primer elemento del universo es un personaje, lo toma como caso base, no yey
+Posible solucion al problema: al inicio filtrar el universo para que solo haya objetos sin quitar los personajes que los construyen
+tal vez yey?-}
 
 -- Asume que hay al menos un objeto
 objeto_libre_mas_cercano :: ?
