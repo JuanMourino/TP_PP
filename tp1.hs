@@ -69,7 +69,7 @@ objeto_de (Right o) = o
 en_posesión_de :: String -> Objeto -> Bool
 en_posesión_de n = foldObjeto (const (const False)) (\ r p -> nombre_personaje p == n) (const False)
 
-objeto_libre :: Objeto -> Bool
+{-objeto_libre :: Objeto -> Bool
 objeto_libre = foldObjeto (const (const True)) (const (const False)) (const False)
 
 norma2 :: (Float, Float) -> (Float, Float) -> Float
@@ -102,34 +102,34 @@ objeto_de_nombre :: String -> Universo -> Objeto
 objeto_de_nombre n u = foldr1 (\x1 x2 -> if nombre_objeto x1 == n then x1 else x2) (objetos_en u)
 
 es_una_gema :: Objeto -> Bool
-es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
+es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o) -}
 
 {-Ejercicio 1-}
 
-foldPersonaje :: (Posición -> String -> b) -> (Dirección -> b -> b) -> (b -> b) -> Personaje -> b
+foldPersonaje :: (Posición -> String -> b) -> (b -> Dirección -> b) -> (b -> b) -> Personaje -> b
 foldPersonaje cBase cMueve cMuere per = case per of
                                         Personaje pos nombre -> cBase pos nombre
-                                        Mueve personaje dir -> cMueve dir (f personaje)
+                                        Mueve personaje dir -> cMueve (f personaje) dir 
                                         Muere personaje -> cMuere (f personaje)
                                         where f = foldPersonaje cBase cMueve cMuere
 
-foldObjeto :: (Posición -> String -> b) -> (Personaje -> b -> b) -> (b -> b) -> Objeto -> b
+foldObjeto :: (Posición -> String -> b) -> (b -> Personaje -> b) -> (b -> b) -> Objeto -> b
 foldObjeto cBase cTomado cDestruido obj = case obj of
                                           Objeto pos nombre -> cBase pos nombre
-                                          Tomado objeto personaje -> cTomado personaje (f objeto)
+                                          Tomado objeto personaje -> cTomado (f objeto) personaje 
                                           EsDestruido objeto -> cDestruido (f objeto)
                                           where f = foldObjeto cBase cTomado cDestruido
 
 {-Ejercicio 2-}
 
 posición_personaje :: Personaje -> Posición
-posición_personaje = foldPersonaje (const) (flip siguiente_posicion) (id)
+posición_personaje = foldPersonaje (const) (siguiente_posición) (id)
 --El caso base es const porque no interesa el nombre y en Personaje esta primero la posición
 --Por def de const: const p s = (\p -> _ -> p) p s = p
 --Uso flip siguiente_posicion porque en la recursion esta primero la dirección y despues el llamado recursivo
 
 nombre_objeto :: Objeto -> String
-nombre_objeto = foldObjeto (flip const) (flip const) (id) --flip porque quiero que me devuelva el argumento de la derecha
+nombre_objeto = foldObjeto (flip const) (const) (id) --flip porque quiero que me devuelva el argumento de la derecha
 
 {-Ejercicio 3-}
 {-Idea: Como el universo es una lista podemos usar foldr y usar las funciones es_un_objeto y es_un_personaje respectivamente
@@ -137,11 +137,15 @@ Despues simplemente usar (:) como funcion del foldr para agregarlos a todos en u
 Podemos usar objeto_de y personaje_de para que la lista devuelta sea de tipo Objeto o Personaje y no de tipo Either
 No importa el orden para la consigna YEY-}
 
-objetos_en :: ?
-objetos_en = ?
+objetos_en :: Universo -> [Objeto]
+objetos_en = foldr(\x acc -> case x of
+                            Left _ -> acc
+                            Right o -> o : acc) []
 
-personajes_en :: ?
-personajes_en = ?
+personajes_en :: Universo -> [Personaje]
+personajes_en = foldr(\x acc -> case x of
+                               Left p -> p : acc
+                               Right _ -> acc) []
 
 {-Ejercicio 4-}
 {-Idea: va revisando el universo, si vemos un objeto lo analizamos con foldObjeto (si esta destruido o en posesion de otra persona), 
@@ -149,10 +153,10 @@ filtramos todas sus demas apariciones del universo, si la persona que lo posee e
 lista que devuelve la funcion
 En todos los casos seguimos con la recursion sobre el universo (afectado o no por un filtro)-}
 
-objetos_en_posesión_de :: ?
-objetos_en_posesión_de = ?
+objetos_en_posesión_de :: String -> Universo -> [Objeto]
+objetos_en_posesión_de n u = foldr(\x res-> if en_posesión_de n x then x:res else res) [] (objetos_en u)  
 
-{-Ejercicio 5-}
+{-Ejercicio 5
 {-Idea: Usar una funcion auxiliar de distancia para los objetos (YA EXISTE), posiblemente una para obtener la posicion(usando foldObjeto)
 Usar una funcion auxiliar para hallar la posicion del personaje en cuestion
 Como asumimos que hay al menos un objeto podemos usar foldr1 yey
@@ -240,3 +244,4 @@ testsEj7 = test [ -- Casos de test para el ejercicio 7
   podemos_ganarle_a_thanos universo_sin_thanos         -- Caso de test 1 - expresión a testear
     ~=? False                                          -- Caso de test 1 - resultado esperado
   ]
+  -}
