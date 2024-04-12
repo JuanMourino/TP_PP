@@ -153,7 +153,7 @@ objetos_en_posesión_de :: ?
 objetos_en_posesión_de = ?
 
 {-Ejercicio 5-}
-{-Idea: Usar una funcion auxiliar de distancia para los objetos, posiblemente una para obtener la posicion(usando foldObjeto)
+{-Idea: Usar una funcion auxiliar de distancia para los objetos (YA EXISTE), posiblemente una para obtener la posicion(usando foldObjeto)
 Usar una funcion auxiliar para hallar la posicion del personaje en cuestion
 Como asumimos que hay al menos un objeto podemos usar foldr1 yey
 Problema, si el primer elemento del universo es un personaje, lo toma como caso base, no yey
@@ -165,11 +165,21 @@ objeto_libre_mas_cercano :: ?
 objeto_libre_mas_cercano = ?
 
 {-Ejercicio 6-}
+{-Idea: Recorremos el universo con una auxiliar que devuelve un Int, cuando vemos un objeto, usamos la funcion es_una_gema, si lo es,
+vemos si la ultima persona que la tomo es Thanos (con foldObjeto), si tambien se cumple, sumamos 1 a lo que retorna
+Si al final esta funcion retorna 6 gemas, entonces tiene_thanos_todas_las_gemas es True, sino es False-}
 
 tiene_thanos_todas_las_gemas :: ?
 tiene_thanos_todas_las_gemas = ?
 
 {-Ejercicio 7-}
+{-Idea: Primero ver que not tiene_thanos_todas_las_gemas, despues usamos 2 auxiliares:
+Una para ver si esta el personaje Thor y ademas el objeto Stormbreaker PREGUNTAR SI DEBE ESTA EN POSESION DE THOR
+Otra para ver si estan los Personajes Wanda y Vision y esta el objeto "Gema de la Mente" y en posesion de Vision
+usando estas 3 funciones, la funcion seria
+(not tiene_thanos_todas_las_gemas) && (auxThor || auxWanda)
+Podemos usar objeto_de_nombre para que nos devuelva Stormbreaker y Gema de la mente yey
+Importante ver que Wanda, Vision y Thor esten vivos en sus respectivos casos-}
 
 podemos_ganarle_a_thanos :: ?
 podemos_ganarle_a_thanos = ?
