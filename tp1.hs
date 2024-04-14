@@ -224,7 +224,7 @@ tal vez yey?-}
 -- Asume que hay al menos un objeto
 objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
 objeto_libre_mas_cercano per u = foldr1 (\obj mas_cercano -> if (distancia per obj) < (distancia per mas_cercano)
-                                                            then obj else acc) (objetos_en u)
+                                                            then obj else acc) (objetos_libres_en u)
 
 {-Ejercicio 6
 {-Idea: Recorremos el universo con una auxiliar que devuelve un Int, cuando vemos un objeto, usamos la funcion es_una_gema, si lo es,
