@@ -223,18 +223,21 @@ tal vez yey?-}
 
 -- Asume que hay al menos un objeto
 objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
-objeto_libre_mas_cercano per u = foldr1 (\obj mas_cercano -> if (distancia per obj) < (distancia per mas_cercano)
-                                                            then obj else acc) (objetos_libres_en u)
+objeto_libre_mas_cercano per u = foldr1 (\obj mas_cercano -> if (distancia (Left per) (Right obj)) < (distancia (Left per) (Right mas_cercano))
+                                                            then obj else mas_cercano) (objetos_libres_en u)
 
-{-Ejercicio 6
+{-Ejercicio 6-}
 {-Idea: Recorremos el universo con una auxiliar que devuelve un Int, cuando vemos un objeto, usamos la funcion es_una_gema, si lo es,
 vemos si la ultima persona que la tomo es Thanos (con foldObjeto), si tambien se cumple, sumamos 1 a lo que retorna
 Si al final esta funcion retorna 6 gemas, entonces tiene_thanos_todas_las_gemas es True, sino es False-}
 
-tiene_thanos_todas_las_gemas :: ?
-tiene_thanos_todas_las_gemas = ?
+tiene_thanos_todas_las_gemas :: Universo -> Bool
+tiene_thanos_todas_las_gemas u = (gemas_de_thanos (objetos_en u)) == 6
 
-{-Ejercicio 7-}
+gemas_de_thanos :: [Objeto] -> Int
+gemas_de_thanos = foldr (\obj acc -> if ((es_una_gema obj) && (en_posesión_de "Thanos" obj)) then 1 + acc else acc) 0
+
+{-Ejercicio 7
 {-Idea: Primero ver que not tiene_thanos_todas_las_gemas, despues usamos 2 auxiliares:
 Una para ver si esta el personaje Thor y ademas el objeto Stormbreaker PREGUNTAR SI DEBE ESTA EN POSESION DE THOR
 Otra para ver si estan los Personajes Wanda y Vision y esta el objeto "Gema de la Mente" y en posesion de Vision
