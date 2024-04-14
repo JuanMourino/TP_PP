@@ -213,7 +213,7 @@ En todos los casos seguimos con la recursion sobre el universo (afectado o no po
 objetos_en_posesión_de :: String -> Universo -> [Objeto]
 objetos_en_posesión_de n u = foldr(\x res-> if en_posesión_de n x then x:res else res) [] (objetos_en u)  
 
-{-Ejercicio 5
+{-Ejercicio 5-}
 {-Idea: Usar una funcion auxiliar de distancia para los objetos (YA EXISTE), posiblemente una para obtener la posicion(usando foldObjeto)
 Usar una funcion auxiliar para hallar la posicion del personaje en cuestion
 Como asumimos que hay al menos un objeto podemos usar foldr1 yey
@@ -222,10 +222,11 @@ Posible solucion al problema: al inicio filtrar el universo para que solo haya o
 tal vez yey?-}
 
 -- Asume que hay al menos un objeto
-objeto_libre_mas_cercano :: ?
-objeto_libre_mas_cercano = ?
+objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
+objeto_libre_mas_cercano per u = foldr1 (\obj mas_cercano -> if (distancia per obj) < (distancia per mas_cercano)
+                                                            then obj else acc) (objetos_en u)
 
-{-Ejercicio 6-}
+{-Ejercicio 6
 {-Idea: Recorremos el universo con una auxiliar que devuelve un Int, cuando vemos un objeto, usamos la funcion es_una_gema, si lo es,
 vemos si la ultima persona que la tomo es Thanos (con foldObjeto), si tambien se cumple, sumamos 1 a lo que retorna
 Si al final esta funcion retorna 6 gemas, entonces tiene_thanos_todas_las_gemas es True, sino es False-}
