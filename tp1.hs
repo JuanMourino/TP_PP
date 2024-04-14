@@ -69,7 +69,7 @@ objeto_de (Right o) = o
 en_posesión_de :: String -> Objeto -> Bool
 en_posesión_de n = foldObjeto (const (const False)) (\ r p -> nombre_personaje p == n) (const False)
 
-{-objeto_libre :: Objeto -> Bool
+objeto_libre :: Objeto -> Bool
 objeto_libre = foldObjeto (const (const True)) (const (const False)) (const False)
 
 norma2 :: (Float, Float) -> (Float, Float) -> Float
@@ -102,7 +102,7 @@ objeto_de_nombre :: String -> Universo -> Objeto
 objeto_de_nombre n u = foldr1 (\x1 x2 -> if nombre_objeto x1 == n then x1 else x2) (objetos_en u)
 
 es_una_gema :: Objeto -> Bool
-es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o) -}
+es_una_gema o = isPrefixOf "Gema de" (nombre_objeto o)
 
 {-Ejercicio 1-}
 
@@ -138,14 +138,71 @@ Podemos usar objeto_de y personaje_de para que la lista devuelta sea de tipo Obj
 No importa el orden para la consigna YEY-}
 
 objetos_en :: Universo -> [Objeto]
-objetos_en = foldr(\x acc -> case x of
-                            Left _ -> acc
-                            Right o -> o : acc) []
+objetos_en = foldr(\x acc -> if (es_un_objeto x)
+                              then (objeto_de x) : acc
+                              else acc) []
 
 personajes_en :: Universo -> [Personaje]
-personajes_en = foldr(\x acc -> case x of
-                               Left p -> p : acc
-                               Right _ -> acc) []
+personajes_en = foldr(\x acc -> if (es_un_personaje x)
+                                then (personaje_de x) : acc
+                                else acc) []
+
+{-Demostración:
+qvq forall u :: Universo. forall o :: Objeto. elem o (objetos_en u) ==> elem (Right o) u
+
+Para esto vamos a usar:
+
+foldr f z [] = z {F0}
+foldr f z (x:xs) = f x (foldr f z xs) {F1}
+
+elem e [] = False {E0}
+elem e (x:xs) = e == x || elem e xs {E1}
+
+La definición de objetos_en que está más arriba, como {O0},
+las definiciones de cada caso de es_un_objeto como {EO0} y {EO1} respectivamente
+la definición de objeto_de como {OD0}
+
+Y las reglas:
+1) (\x -> Y) Z = Y remplazando x por Z
+2) (\x -> F x) = F
+
+Uso inducción sobre listas sobre el predicado P(xs) tq
+P(ys) = forall o :: Objeto. elem o (objetos_en ys) ==> elem (Right o) ys
+
+-caso base: P([])
+elem o (objetos_en [])
+= elem o (foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] []) por O0
+= elem o [] por F0
+==> elem o []
+
+-caso inductivo: qvq P(ys) ==> P(y:ys)
+                      H.I.     T.I.
+elem o (objeto_en (y:ys))
+= elem o (foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] (y:ys)) por O0
+= elem o ((\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) y foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] ys) por F1
+= elem o ((\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) y (objetos_en ys)) por O0
+= elem o (if (es_un_objeto y) then (objeto_de y):(objetos_en ys) else (objetos_en ys)) por la regla 2
+
+Usamos extensión de Either:
+-caso Left y:
+elem o (if (es_un_objeto (Left y)) then (objeto_de Left y):(objetos_en ys) else (objetos_en ys)))
+= elem o (if False then (objeto_de Left y):(objetos_en ys) else (objetos_en ys))) por EO0
+= elem o (objetos_en ys) por def de if
+= elem o (objetos_en ys) por OD0
+==> elem (Right o) ys por HI
+==> (Right o) == (Left y) || elem (Right o) ys
+= elem (Right o) (Left y : ys)
+
+-caso Right y
+elem o (if (es_un_objeto (Right y) then (objeto_de (Right y)):(objetos_en ys)) else (objetos_en ys)))
+= elem o (if True then (objeto_de (Right y)):(objetos_en ys) else (objetos_en ys)) por EO0
+= elem o (objeto_de (Right y)):(objetos_en ys) por def de if
+= elem o (y : (objetos_en ys)) por OD0
+= o == y || elem o (objetos_en ys) por E1
+==> o == y || elem (Right o) ys por HI
+= (Right o) == (Right y) || elem (Right o) ys
+= elem (Right o) (y:ys) por E1
+-}
 
 {-Ejercicio 4-}
 {-Idea: va revisando el universo, si vemos un objeto lo analizamos con foldObjeto (si esta destruido o en posesion de otra persona), 
