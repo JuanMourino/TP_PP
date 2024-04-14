@@ -237,7 +237,7 @@ tiene_thanos_todas_las_gemas u = (gemas_de_thanos (objetos_en u)) == 6
 gemas_de_thanos :: [Objeto] -> Int
 gemas_de_thanos = foldr (\obj acc -> if ((es_una_gema obj) && (en_posesión_de "Thanos" obj)) then 1 + acc else acc) 0
 
-{-Ejercicio 7
+{-Ejercicio 7-}
 {-Idea: Primero ver que not tiene_thanos_todas_las_gemas, despues usamos 2 auxiliares:
 Una para ver si esta el personaje Thor y ademas el objeto Stormbreaker PREGUNTAR SI DEBE ESTA EN POSESION DE THOR
 Otra para ver si estan los Personajes Wanda y Vision y esta el objeto "Gema de la Mente" y en posesion de Vision
@@ -246,9 +246,15 @@ usando estas 3 funciones, la funcion seria
 Podemos usar objeto_de_nombre para que nos devuelva Stormbreaker y Gema de la mente yey
 Importante ver que Wanda, Vision y Thor esten vivos en sus respectivos casos-}
 
-podemos_ganarle_a_thanos :: ?
-podemos_ganarle_a_thanos = ?
+podemos_ganarle_a_thanos :: Universo -> Bool
+podemos_ganarle_a_thanos u = (not (tiene_thanos_todas_las_gemas u))  && (estaThor u || wanda_Vision u)
 
+estaThor :: Universo -> Bool
+estaThor u =  (está_el_personaje "Thor" u)  && (está_el_objeto "StormBreaker" u) && (en_posesión_de "Thor" (objeto_de_nombre "StormBreaker" u))
+
+wanda_Vision :: Universo -> Bool
+wanda_Vision u = (está_el_personaje "Wanda" u) && (está_el_personaje "Visión" u) && (está_el_objeto "Gema de la Mente" u) && (en_posesión_de "Visión" (objeto_de_nombre "Gema de la Mente" u))
+{-
 {-Tests-}
 
 main :: IO Counts
