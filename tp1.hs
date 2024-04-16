@@ -129,7 +129,7 @@ posición_personaje = foldPersonaje (const) (siguiente_posición) (id)
 --Uso flip siguiente_posicion porque en la recursion esta primero la dirección y despues el llamado recursivo
 
 nombre_objeto :: Objeto -> String
-nombre_objeto = foldObjeto (flip const) (const) (id) --flip porque quiero que me devuelva el argumento de la derecha
+nombre_objeto = foldObjeto (const id) (const) (id) 
 
 {-Ejercicio 3-}
 {-Idea: Como el universo es una lista podemos usar foldr y usar las funciones es_un_objeto y es_un_personaje respectivamente
@@ -232,10 +232,10 @@ vemos si la ultima persona que la tomo es Thanos (con foldObjeto), si tambien se
 Si al final esta funcion retorna 6 gemas, entonces tiene_thanos_todas_las_gemas es True, sino es False-}
 
 tiene_thanos_todas_las_gemas :: Universo -> Bool
-tiene_thanos_todas_las_gemas u = (gemas_de_thanos (objetos_en u)) == 6
+tiene_thanos_todas_las_gemas u = (está_el_personaje "Thanos" u) && (gemas_de_thanos u) == 6
 
-gemas_de_thanos :: [Objeto] -> Int
-gemas_de_thanos = foldr (\obj acc -> if ((es_una_gema obj) && (en_posesión_de "Thanos" obj)) then 1 + acc else acc) 0
+gemas_de_thanos :: Universo -> Int
+gemas_de_thanos u = length (filter (es_una_gema) (objetos_en_posesión_de "Thanos" u))
 
 {-Ejercicio 7-}
 {-Idea: Primero ver que not tiene_thanos_todas_las_gemas, despues usamos 2 auxiliares:
@@ -254,7 +254,7 @@ estaThor u =  (está_el_personaje "Thor" u)  && (está_el_objeto "StormBreaker" 
 
 wanda_Vision :: Universo -> Bool
 wanda_Vision u = (está_el_personaje "Wanda" u) && (está_el_personaje "Visión" u) && (está_el_objeto "Gema de la Mente" u) && (en_posesión_de "Visión" (objeto_de_nombre "Gema de la Mente" u))
-{-
+
 {-Tests-}
 
 main :: IO Counts
@@ -274,6 +274,58 @@ phil = Personaje (0,0) "Phil"
 mjölnir = Objeto (2,2) "Mjölnir"
 universo_sin_thanos = universo_con [phil] [mjölnir]
 
+phil_cuatro_direcciones = Mueve (Mueve (Mueve (Mueve phil Este) Oeste) Sur) Norte
+
+thor = Personaje (1, 1) "Thor"
+thor_movido = Mueve thor Este
+thor_muerto = Muere thor
+thor_movido_postmortem = Mueve (Muere thor_movido) Sur
+
+thanos = Personaje (-5, 4) "Thanos"
+
+wanda = Personaje (3, -1) "Wanda"
+wanda_muerta = Muere wanda
+
+vision = Personaje (3, -2) "Visión"
+vision_muerto = Muere vision
+
+stormBreaker = Objeto (0, 0) "StormBreaker"
+stormBreaker_con_thor = Tomado stormBreaker thor
+stormBreaker_destruido_con_thor = EsDestruido stormBreaker_con_thor
+stormBreaker_tomado_destruido = Tomado stormBreaker_destruido_con_thor thanos
+
+gemaMente = Objeto (-10, 1) "Gema de la Mente"
+gemaMente_vision = Tomado gemaMente vision
+gemaMente_thanos = Tomado gemaMente thanos
+gemaMente_destruida = EsDestruido gemaMente_thanos
+
+gemaHaskell = Objeto (0,0) "Gema de Haskell"
+gemaHaskell_thanos = Tomado gemaHaskell thanos
+
+gemaRecursion = Objeto (0, 1) "Gema de Recursion"
+gemaRecursion_thanos = Tomado gemaRecursion thanos
+
+gemaProlog = Objeto (1, 0) "Gema de Prolog"
+gemaProlog_thanos = Tomado gemaProlog thanos
+
+gemaJava = Objeto (1, 1) "Gema de Java"
+gemaJava_thanos = Tomado gemaJava thanos
+
+gemaPython = Objeto (-1, 2) "Gema de Python"
+gemaPython_thanos = Tomado gemaPython thanos
+
+gemas_thanos = [gemaHaskell_thanos, gemaProlog_thanos, gemaPython_thanos, gemaJava_thanos, gemaRecursion_thanos]
+
+universo_gema_destruida = universo_con [thor, thanos, wanda] (gemas_thanos ++ [gemaMente_destruida])
+
+universo_thanos_con_gemas = universo_con [thor, thanos, wanda, phil, vision] (gemas_thanos ++ [stormBreaker_con_thor] ++ [gemaMente_thanos])
+universo_ganamos_thor = universo_con [thor, wanda, thanos, phil, vision] ([stormBreaker_con_thor]++gemas_thanos)
+universo_ganamos_wandaVision = universo_con [thor, wanda, thanos, phil, vision] ([gemaMente_vision] ++ gemas_thanos)
+universo_ganamos_con_todo = universo_con [thor, wanda, thanos, phil, vision] ([gemaMente_vision, stormBreaker_con_thor] ++ gemas_thanos)
+universo_perdemos_por_poco = universo_con [thor, wanda, vision_muerto, thanos] ([gemaMente_vision, stormBreaker_destruido_con_thor])
+universo_todo_mal = universo_con [thor_muerto, wanda_muerta, vision, thanos, phil] [stormBreaker_con_thor, gemaMente_vision]
+universo_sin_heroes = universo_con [phil, thanos] gemas_thanos
+
 testsEj1 = test [ -- Casos de test para el ejercicio 1
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) phil             -- Caso de test 1 - expresión a testear
     ~=? 0                                                               -- Caso de test 1 - resultado esperado
@@ -285,30 +337,107 @@ testsEj1 = test [ -- Casos de test para el ejercicio 1
 testsEj2 = test [ -- Casos de test para el ejercicio 2
   posición_personaje phil       -- Caso de test 1 - expresión a testear
     ~=? (0,0)                   -- Caso de test 1 - resultado esperado
+  ,
+  posición_personaje phil_cuatro_direcciones
+    ~=? (0,0)
+  ,
+  posición_personaje thor
+    ~=? (1, 1)
+  ,
+  posición_personaje thor_movido
+    ~=? (2, 1)
+  ,
+  posición_personaje thor_muerto
+    ~=? (1, 1)
+  ,
+  posición_personaje thor_movido_postmortem
+    ~=? (2, 0)
   ]
 
 testsEj3 = test [ -- Casos de test para el ejercicio 3
   objetos_en []       -- Caso de test 1 - expresión a testear
     ~=? []            -- Caso de test 1 - resultado esperado
+  ,
+  personajes_en []
+    ~=? []
+  ,
+  objetos_en (universo_con [] [stormBreaker])
+    ~=? [stormBreaker]
+  ,
+  objetos_en [Left thanos, Right stormBreaker,Left thor]
+    ~=? [stormBreaker]
+  ,
+  objetos_en [Left thanos, Right gemaMente,Left thor, Right stormBreaker_con_thor]
+    ~=? [gemaMente, stormBreaker_con_thor]
+  ,
+  objetos_en (universo_con [thor] [gemaMente, stormBreaker_destruido_con_thor])
+    ~=? [gemaMente, stormBreaker_destruido_con_thor]
+  ,
+  personajes_en (universo_con [] [stormBreaker])
+   ~=? []
+  ,
+  personajes_en (universo_con [phil, thor, thanos] [])
+    ~=? [phil, thor, thanos]
   ]
 
 testsEj4 = test [ -- Casos de test para el ejercicio 4
   objetos_en_posesión_de "Phil" []       -- Caso de test 1 - expresión a testear
     ~=? []                             -- Caso de test 1 - resultado esperado
+  ,
+  objetos_en_posesión_de "Thor" universo_ganamos_thor
+    ~=? [stormBreaker_con_thor]
+  ,
+  objetos_en_posesión_de "Thanos" universo_thanos_con_gemas
+    ~=? (gemas_thanos ++ [gemaMente_thanos])
+  ,
+  objetos_en_posesión_de "Thor" universo_perdemos_por_poco
+   ~=? []
   ]
 
 testsEj5 = test [ -- Casos de test para el ejercicio 5
   objeto_libre_mas_cercano phil [Right mjölnir]       -- Caso de test 1 - expresión a testear
     ~=? mjölnir                                       -- Caso de test 1 - resultado esperado
+  ,
+  objeto_libre_mas_cercano phil (universo_con [thor, phil] [mjölnir, stormBreaker])
+    ~=? stormBreaker
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
   tiene_thanos_todas_las_gemas universo_sin_thanos       -- Caso de test 1 - expresión a testear
     ~=? False                                            -- Caso de test 1 - resultado esperado
+  ,
+  tiene_thanos_todas_las_gemas universo_thanos_con_gemas
+    ~=? True
+  ,
+  tiene_thanos_todas_las_gemas universo_gema_destruida
+    ~=? False
+  ,
+  tiene_thanos_todas_las_gemas (universo_con [thor, thanos] [stormBreaker])
+    ~=? False
   ]
 
 testsEj7 = test [ -- Casos de test para el ejercicio 7
   podemos_ganarle_a_thanos universo_sin_thanos         -- Caso de test 1 - expresión a testear
     ~=? False                                          -- Caso de test 1 - resultado esperado
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_con_todo
+    ~=? True
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_thor
+    ~=? True
+  ,
+  podemos_ganarle_a_thanos universo_ganamos_wandaVision
+    ~=? True
+  ,
+  podemos_ganarle_a_thanos universo_perdemos_por_poco
+    ~=? False
+  ,
+  podemos_ganarle_a_thanos universo_sin_heroes
+    ~=? False --Aunque Phil es mi heroe
+  ,
+  podemos_ganarle_a_thanos universo_thanos_con_gemas
+    ~=? False
+  ,
+  podemos_ganarle_a_thanos universo_todo_mal
+    ~=? False
   ]
-  -}
