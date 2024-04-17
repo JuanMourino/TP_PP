@@ -271,6 +271,7 @@ allTests = test [ -- Reemplazar los tests de prueba por tests propios
   "ejercicio6" ~: testsEj6,
   "ejercicio7" ~: testsEj7
   ]
+steve = Personaje (0, 0) "Steve"
 
 phil = Personaje (0,0) "Phil"
 mjölnir = Objeto (2,2) "Mjölnir"
@@ -330,10 +331,19 @@ universo_sin_heroes = universo_con [phil, thanos] gemas_thanos
 
 testsEj1 = test [ -- Casos de test para el ejercicio 1
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) phil             -- Caso de test 1 - expresión a testear
-    ~=? 0                                                               -- Caso de test 1 - resultado esperado
+    ~=? 0                                                         -- Caso de test 1 - resultado esperado
   ,
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) (Muere phil)     -- Caso de test 2 - expresión a testear
-    ~=? 1                                                               -- Caso de test 2 - resultado esperado
+    ~=? 1
+  ,
+  foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (phil) Este)   
+    ~=? 1         
+  ,
+  foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (Muere (steve)) Este) 
+    ~=? 2 
+  ,
+  foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (Mueve (Muere (steve)) Este) Sur)
+   ~=? 3
   ]
 
 testsEj2 = test [ -- Casos de test para el ejercicio 2
@@ -354,6 +364,23 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   ,
   posición_personaje thor_movido_postmortem
     ~=? (2, 0)
+  ,
+  nombre_objeto gemaHaskell
+    ~=? "Gema de Haskell"
+  ,
+  nombre_objeto stormBreaker
+    ~=? "StormBreaker"
+  ,
+  nombre_objeto mjölnir
+    ~=? "Mjölnir"
+  ,
+  nombre_objeto gemaProlog
+    ~=? "Gema de Prolog"
+  ,
+  nombre_objeto gemaPython
+     ~=? "Gema de Python"
+  --A mi parece, no tiene mucha utilidad poner muchos test en "nombre_objeto". Es preferible meter mas testeos en fold objeto, por ejemplo.
+
   ]
 
 testsEj3 = test [ -- Casos de test para el ejercicio 3
