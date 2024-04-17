@@ -184,23 +184,25 @@ elem o (objeto_en (y:ys))
 = elem o (if (es_un_objeto y) then (objeto_de y):(objetos_en ys) else (objetos_en ys)) por la regla 2
 
 Usamos extensión de Either:
--caso Left y:
-elem o (if (es_un_objeto (Left y)) then (objeto_de Left y):(objetos_en ys) else (objetos_en ys)))
-= elem o (if False then (objeto_de Left y):(objetos_en ys) else (objetos_en ys))) por EO0
+-caso y = Left y':
+elem o (if (es_un_objeto (Left y')) then (objeto_de Left y'):(objetos_en ys) else (objetos_en ys)))
+= elem o (if False then (objeto_de Left y'):(objetos_en ys) else (objetos_en ys))) por EO0
 = elem o (objetos_en ys) por def de if
-= elem o (objetos_en ys) por OD0
 ==> elem (Right o) ys por HI
-==> (Right o) == (Left y) || elem (Right o) ys
-= elem (Right o) (Left y : ys)
+= False || (elem (Right o) ys)
+= ((Right o) == (Left y')) || (elem (Right o) ys)
+= elem (Right o) (Left y' : ys)
+= elem (Right o) (y:ys)
 
--caso Right y
-elem o (if (es_un_objeto (Right y) then (objeto_de (Right y)):(objetos_en ys)) else (objetos_en ys)))
-= elem o (if True then (objeto_de (Right y)):(objetos_en ys) else (objetos_en ys)) por EO0
-= elem o (objeto_de (Right y)):(objetos_en ys) por def de if
-= elem o (y : (objetos_en ys)) por OD0
-= o == y || elem o (objetos_en ys) por E1
-==> o == y || elem (Right o) ys por HI
-= (Right o) == (Right y) || elem (Right o) ys
+-caso y = Right y'
+elem o (if (es_un_objeto (Right y') then (objeto_de (Right y')):(objetos_en ys)) else (objetos_en ys)))
+= elem o (if True then (objeto_de (Right y')):(objetos_en ys) else (objetos_en ys)) por EO0
+= elem o (objeto_de (Right y')):(objetos_en ys) por def de if
+= elem o (y' : (objetos_en ys)) por OD0
+= (o == y') || (elem o (objetos_en ys)) por E1
+==> (o == y') || (elem (Right o) ys) por HI
+= ((Right o) == (Right y')) || (elem (Right o) ys)
+= ((Right o) == y) || (elem (Right o) ys)
 = elem (Right o) (y:ys) por E1
 -}
 
