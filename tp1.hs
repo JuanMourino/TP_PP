@@ -293,6 +293,7 @@ vision = Personaje (3, -2) "Visión"
 vision_muerto = Muere vision
 
 stormBreaker = Objeto (0, 0) "StormBreaker"
+stormBreaker_destruido = EsDestruido stormBreaker
 stormBreaker_con_thor = Tomado stormBreaker thor
 stormBreaker_destruido_con_thor = EsDestruido stormBreaker_con_thor
 stormBreaker_tomado_destruido = Tomado stormBreaker_destruido_con_thor thanos
@@ -379,6 +380,18 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   ,
   nombre_objeto gemaPython
      ~=? "Gema de Python"
+  ,
+  nombre_objeto stormBreaker_destruido --Da el nombre de un objeto destruido
+    ~=? "StormBreaker"
+  ,
+  nombre_objeto gemaMente_thanos --Da el nombre de un objeto tomado por algun personaje
+    ~=? "Gema de la Mente"
+  ,
+  nombre_objeto gemaMente_vision
+    ~=? "Gema de la Mente"
+  ,
+  nombre_objeto stormBreaker_destruido_con_thor --Da el nombre de un objeto destruido y tomado
+    ~=? "StormBreaker"
   --A mi parece, no tiene mucha utilidad poner muchos test en "nombre_objeto". Es preferible meter mas testeos en fold objeto, por ejemplo.
 
   ]
@@ -397,7 +410,7 @@ testsEj3 = test [ -- Casos de test para el ejercicio 3
     ~=? [stormBreaker]
   ,
   objetos_en [Left thanos, Right gemaMente,Left thor, Right stormBreaker_con_thor]
-    ~=? [gemaMente, stormBreaker_con_thor]
+    ~=? [gemaMente, stormBreaker_con_thor] --No importa si hay objetos entre los personajes
   ,
   objetos_en (universo_con [thor] [gemaMente, stormBreaker_destruido_con_thor])
     ~=? [gemaMente, stormBreaker_destruido_con_thor]
@@ -407,6 +420,9 @@ testsEj3 = test [ -- Casos de test para el ejercicio 3
   ,
   personajes_en (universo_con [phil, thor, thanos] [])
     ~=? [phil, thor, thanos]
+  ,
+  personajes_en universo_perdemos_por_poco
+    ~=? [thor, wanda, vision_muerto, thanos] --Se asegura de incluir personajes muertos
   ]
 
 testsEj4 = test [ -- Casos de test para el ejercicio 4
@@ -420,7 +436,10 @@ testsEj4 = test [ -- Casos de test para el ejercicio 4
     ~=? (gemas_thanos ++ [gemaMente_thanos])
   ,
   objetos_en_posesión_de "Thor" universo_perdemos_por_poco
-   ~=? []
+   ~=? [] --Donde hay un objeto en su posesion pero destruido
+  ,
+  objetos_en_posesión_de "Visión" universo_perdemos_por_poco
+    ~=? [gemaMente_vision] --Donde el personaje esta muerto
   ]
 
 testsEj5 = test [ -- Casos de test para el ejercicio 5
@@ -429,6 +448,15 @@ testsEj5 = test [ -- Casos de test para el ejercicio 5
   ,
   objeto_libre_mas_cercano phil (universo_con [thor, phil] [mjölnir, stormBreaker])
     ~=? stormBreaker
+  ,
+  elem (objeto_libre_mas_cercano steve (universo_con [steve, phil, thanos] [gemaRecursion, gemaJava, gemaProlog, gemaMente, gemaPython])) [gemaRecursion, gemaProlog]
+    ~=? True --Hay mas de una opcion, solo se asegura que este entre las opciones
+  ,
+  objeto_libre_mas_cercano steve (universo_con [thanos, steve, thor] (gemas_thanos ++ [mjölnir]))
+    ~=? mjölnir --Donde hay otros mas cercanos, pero no estan libres
+  ,
+  objeto_libre_mas_cercano steve (universo_con [thanos, thor, steve] [stormBreaker_destruido, mjölnir, gemaMente]) 
+    ~=? mjölnir --Donde hay uno mas cercano pero destruido
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
