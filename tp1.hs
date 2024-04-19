@@ -346,17 +346,29 @@ testsEj1 = test [ -- Casos de test para el ejercicio 1
   foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (Mueve (Muere (steve)) Este) Sur)
    ~=? 3
   ,
-  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) stormBreaker
+  foldPersonaje (\p s -> []) (\r d -> d : r) (id) thor_movido
+    ~=? [Este]
+  ,
+  foldPersonaje (\p s -> []) (\r d -> d : r) (id) thor_movido_postmortem
+    ~=? [Sur, Este]
+  ,
+  foldPersonaje (\p s -> []) (\r d -> d : r) (id) phil_cuatro_direcciones
+    ~=? [Norte, Sur, Oeste, Este]
+  ,
+  foldObjeto(\p s -> 0) (\r p -> r+1) (\r -> r+1) stormBreaker
    ~=? 0
   ,
-  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (EsDestruido (EsDestruido (stormBreaker)))
+  foldObjeto(\p s -> 0) (\r p -> r+1) (\r -> r+1) (EsDestruido (EsDestruido (stormBreaker)))
    ~=? 2
   ,
-  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Tomado (Tomado (EsDestruido (gemaMente)) phil) vision)
+  foldObjeto(\p s -> 0) (\r p -> r+1) (\r -> r+1) (Tomado (Tomado (EsDestruido (gemaMente)) phil) vision)
    ~=? 3
   ,
-  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Tomado (Tomado gemaHaskell vision )vision)
+  foldObjeto(\p s -> 0) (\r p -> r+1) (\r -> r+1) (Tomado (Tomado gemaHaskell vision )vision)
    ~=? 2
+  ,
+  foldObjeto (\p s -> []) (\r p -> p : r) (id) (Tomado gemaMente_thanos vision)
+    ~=? [vision, thanos]
   ]
 
 testsEj2 = test [ -- Casos de test para el ejercicio 2
