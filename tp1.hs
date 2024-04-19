@@ -332,9 +332,9 @@ universo_sin_heroes = universo_con [phil, thanos] gemas_thanos
 
 testsEj1 = test [ -- Casos de test para el ejercicio 1
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) phil             -- Caso de test 1 - expresión a testear
-    ~=? 0                                                         -- Caso de test 1 - resultado esperado
+    ~=? 0                                                              -- Caso de test 1 - resultado esperado
   ,
-  foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) (Muere phil)     -- Caso de test 2 - expresión a testear
+  foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) (Muere phil)     
     ~=? 1
   ,
   foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (phil) Este)   
@@ -345,11 +345,23 @@ testsEj1 = test [ -- Casos de test para el ejercicio 1
   ,
   foldPersonaje(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Mueve (Mueve (Muere (steve)) Este) Sur)
    ~=? 3
+  ,
+  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) stormBreaker
+   ~=? 0
+  ,
+  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (EsDestruido (EsDestruido (stormBreaker)))
+   ~=? 2
+  ,
+  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Tomado (Tomado (EsDestruido (gemaMente)) phil) vision)
+   ~=? 3
+  ,
+  foldObjeto(\p s -> 0) (\r d -> r+1) (\r -> r+1) (Tomado (Tomado gemaHaskell vision )vision)
+   ~=? 2
   ]
 
 testsEj2 = test [ -- Casos de test para el ejercicio 2
-  posición_personaje phil       -- Caso de test 1 - expresión a testear
-    ~=? (0,0)                   -- Caso de test 1 - resultado esperado
+  posición_personaje phil       
+    ~=? (0,0)                   
   ,
   posición_personaje phil_cuatro_direcciones
     ~=? (0,0)
@@ -392,13 +404,13 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   ,
   nombre_objeto stormBreaker_destruido_con_thor --Da el nombre de un objeto destruido y tomado
     ~=? "StormBreaker"
-  --A mi parece, no tiene mucha utilidad poner muchos test en "nombre_objeto". Es preferible meter mas testeos en fold objeto, por ejemplo.
+  --A mi parecer, no tiene mucha utilidad poner muchos test en "nombre_objeto". Es preferible meter mas testeos en fold objeto, por ejemplo.
 
   ]
 
 testsEj3 = test [ -- Casos de test para el ejercicio 3
-  objetos_en []       -- Caso de test 1 - expresión a testear
-    ~=? []            -- Caso de test 1 - resultado esperado
+  objetos_en []      
+    ~=? []            
   ,
   personajes_en []
     ~=? []
@@ -426,8 +438,8 @@ testsEj3 = test [ -- Casos de test para el ejercicio 3
   ]
 
 testsEj4 = test [ -- Casos de test para el ejercicio 4
-  objetos_en_posesión_de "Phil" []       -- Caso de test 1 - expresión a testear
-    ~=? []                             -- Caso de test 1 - resultado esperado
+  objetos_en_posesión_de "Phil" []       
+    ~=? []                             
   ,
   objetos_en_posesión_de "Thor" universo_ganamos_thor
     ~=? [stormBreaker_con_thor]
@@ -443,8 +455,8 @@ testsEj4 = test [ -- Casos de test para el ejercicio 4
   ]
 
 testsEj5 = test [ -- Casos de test para el ejercicio 5
-  objeto_libre_mas_cercano phil [Right mjölnir]       -- Caso de test 1 - expresión a testear
-    ~=? mjölnir                                       -- Caso de test 1 - resultado esperado
+  objeto_libre_mas_cercano phil [Right mjölnir]       
+    ~=? mjölnir                                       
   ,
   objeto_libre_mas_cercano phil (universo_con [thor, phil] [mjölnir, stormBreaker])
     ~=? stormBreaker
@@ -460,8 +472,8 @@ testsEj5 = test [ -- Casos de test para el ejercicio 5
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
-  tiene_thanos_todas_las_gemas universo_sin_thanos       -- Caso de test 1 - expresión a testear
-    ~=? False                                            -- Caso de test 1 - resultado esperado
+  tiene_thanos_todas_las_gemas universo_sin_thanos       
+    ~=? False                                            
   ,
   tiene_thanos_todas_las_gemas universo_thanos_con_gemas
     ~=? True
@@ -474,8 +486,8 @@ testsEj6 = test [ -- Casos de test para el ejercicio 6
   ]
 
 testsEj7 = test [ -- Casos de test para el ejercicio 7
-  podemos_ganarle_a_thanos universo_sin_thanos         -- Caso de test 1 - expresión a testear
-    ~=? False                                          -- Caso de test 1 - resultado esperado
+  podemos_ganarle_a_thanos universo_sin_thanos         
+    ~=? False                                          
   ,
   podemos_ganarle_a_thanos universo_ganamos_con_todo
     ~=? True
