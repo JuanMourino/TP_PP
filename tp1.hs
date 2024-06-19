@@ -124,81 +124,71 @@ foldObjeto cBase cTomado cDestruido obj = case obj of
 
 posición_personaje :: Personaje -> Posición
 posición_personaje = foldPersonaje (const) (siguiente_posición) (id)
---El caso base es const porque no interesa el nombre y en Personaje esta primero la posición
---Por def de const: const p s = (\p -> _ -> p) p s = p
---Uso flip siguiente_posicion porque en la recursion esta primero la dirección y despues el llamado recursivo
 
 nombre_objeto :: Objeto -> String
 nombre_objeto = foldObjeto (const id) (const) (id) 
 
 {-Ejercicio 3-}
-{-Idea: Como el universo es una lista podemos usar foldr y usar las funciones es_un_objeto y es_un_personaje respectivamente
-Despues simplemente usar (:) como funcion del foldr para agregarlos a todos en una lista, caso base []
-Podemos usar objeto_de y personaje_de para que la lista devuelta sea de tipo Objeto o Personaje y no de tipo Either
-No importa el orden para la consigna YEY-}
 
 objetos_en :: Universo -> [Objeto]
-objetos_en = foldr(\x acc -> if (es_un_objeto x)
-                              then (objeto_de x) : acc
-                              else acc) []
+objetos_en u = map (objeto_de) (filter es_un_objeto u)
 
 personajes_en :: Universo -> [Personaje]
-personajes_en = foldr(\x acc -> if (es_un_personaje x)
-                                then (personaje_de x) : acc
-                                else acc) []
+personajes_en u = map (personaje_de) (filter es_un_personaje u)
 
 {-Demostración:
 qvq forall u :: Universo. forall o :: Objeto. elem o (objetos_en u) ==> elem (Right o) u
 
 Para esto vamos a usar:
 
-foldr f z [] = z {F0}
-foldr f z (x:xs) = f x (foldr f z xs) {F1}
+filter p [] = [] {F0}
+filter p (x:xs) = if (p x) then x : (filter p xs) else (filter p xs) {F1}
+
+map f [] = [] {M0}
+map f (x:xs) = (f x) : (map f xs) {M1} 
 
 elem e [] = False {E0}
 elem e (x:xs) = e == x || elem e xs {E1}
 
 La definición de objetos_en que está más arriba, como {O0},
-las definiciones de cada caso de es_un_objeto como {EO0} y {EO1} respectivamente
-la definición de objeto_de como {OD0}
-
-Y las reglas:
-1) (\x -> Y) Z = Y remplazando x por Z
-2) (\x -> F x) = F
+Las definiciones de cada caso de es_un_objeto como {EO0} y {EO1} respectivamente
+La definición de objeto_de como {OD0}
 
 Uso inducción sobre listas sobre el predicado P(xs) tq
 P(ys) = forall o :: Objeto. elem o (objetos_en ys) ==> elem (Right o) ys
 
 -caso base: P([])
 elem o (objetos_en [])
-= elem o (foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] []) por O0
-= elem o [] por F0
+= elem o (map (objeto_de) (filter es_un_objeto [])) por O0
+= elem o (map []) por F0
+= elem o [] por M0
 ==> elem o []
 
 -caso inductivo: qvq P(ys) ==> P(y:ys)
                       H.I.     T.I.
 elem o (objeto_en (y:ys))
-= elem o (foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] (y:ys)) por O0
-= elem o ((\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) y foldr (\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) [] ys) por F1
-= elem o ((\x acc -> if (es_un_objeto x) then (objeto_de x):acc else acc) y (objetos_en ys)) por O0
-= elem o (if (es_un_objeto y) then (objeto_de y):(objetos_en ys) else (objetos_en ys)) por la regla 2
+= elem o (map (objeto_de) (filter es_un_objeto (y:ys))) por O0
+= elem o (map(objeto_de) if (es_un_objeto y) then y:(filter es_un_objeto ys) else (filter es_un_objeto ys)) por F1
 
 Usamos extensión de Either:
 -caso y = Left y':
-elem o (if (es_un_objeto (Left y')) then (objeto_de Left y'):(objetos_en ys) else (objetos_en ys)))
-= elem o (if False then (objeto_de Left y'):(objetos_en ys) else (objetos_en ys))) por EO0
-= elem o (objetos_en ys) por def de if
+elem o (map (objeto_de) (if (es_un_objeto (Left y')) then (Left y'):(filter es_un_objeto ys) else (filter es_un_objeto ys))))
+= elem o (map (objeto_de) (if False then (objeto_de Left y'):(filter es_un_objeto ys) else (filter es_un_objeto ys)))) por EO0
+= elem o (map (objeto_de (filter es_un_objeto ys))) por def de if
+= elem o (objetos_en ys) por O0
 ==> elem (Right o) ys por HI
 = False || (elem (Right o) ys)
 = ((Right o) == (Left y')) || (elem (Right o) ys)
-= elem (Right o) (Left y' : ys)
+= elem (Right o) (Left y' : ys) por E1
 = elem (Right o) (y:ys)
 
 -caso y = Right y'
-elem o (if (es_un_objeto (Right y') then (objeto_de (Right y')):(objetos_en ys)) else (objetos_en ys)))
-= elem o (if True then (objeto_de (Right y')):(objetos_en ys) else (objetos_en ys)) por EO0
-= elem o (objeto_de (Right y')):(objetos_en ys) por def de if
-= elem o (y' : (objetos_en ys)) por OD0
+elem o (map (objeto_de) (if (es_un_objeto (Right y') then (objeto_de (Right y')):(filter es_un_objeto ys)) else (filter es_un_objeto ys))))
+= elem o (map (objeto_de) (if True then (objeto_de (Right y')):(filter es_un_objeto ys) else (filter es_un_objeto ys))) por EO1
+= elem o (map (objeto_de) (Right y'):(filter es_un_objeto ys) por def de if
+= elem o ((objeto_de Left y') : (map (objeto_de) (filter es_un_objeto ys))) por M1
+= elem o (y' : (map (objeto_de) (filter es_un_objeto ys))) por OD0
+= elem o (y' : objetos_en ys) por O0
 = (o == y') || (elem o (objetos_en ys)) por E1
 ==> (o == y') || (elem (Right o) ys) por HI
 = ((Right o) == (Right y')) || (elem (Right o) ys)
@@ -207,21 +197,11 @@ elem o (if (es_un_objeto (Right y') then (objeto_de (Right y')):(objetos_en ys))
 -}
 
 {-Ejercicio 4-}
-{-Idea: va revisando el universo, si vemos un objeto lo analizamos con foldObjeto (si esta destruido o en posesion de otra persona), 
-filtramos todas sus demas apariciones del universo, si la persona que lo posee es la que se nos paso como parametro, lo agregamos a la 
-lista que devuelve la funcion
-En todos los casos seguimos con la recursion sobre el universo (afectado o no por un filtro)-}
 
 objetos_en_posesión_de :: String -> Universo -> [Objeto]
-objetos_en_posesión_de n u = foldr(\x res-> if en_posesión_de n x then x:res else res) [] (objetos_en u)  
+objetos_en_posesión_de n u = filter (en_posesión_de n) (objetos_en u)
 
 {-Ejercicio 5-}
-{-Idea: Usar una funcion auxiliar de distancia para los objetos (YA EXISTE), posiblemente una para obtener la posicion(usando foldObjeto)
-Usar una funcion auxiliar para hallar la posicion del personaje en cuestion
-Como asumimos que hay al menos un objeto podemos usar foldr1 yey
-Problema, si el primer elemento del universo es un personaje, lo toma como caso base, no yey
-Posible solucion al problema: al inicio filtrar el universo para que solo haya objetos sin quitar los personajes que los construyen
-tal vez yey?-}
 
 -- Asume que hay al menos un objeto
 objeto_libre_mas_cercano :: Personaje -> Universo -> Objeto
@@ -229,24 +209,15 @@ objeto_libre_mas_cercano per u = foldr1 (\obj mas_cercano -> if (distancia (Left
                                                             then obj else mas_cercano) (objetos_libres_en u)
 
 {-Ejercicio 6-}
-{-Idea: Recorremos el universo con una auxiliar que devuelve un Int, cuando vemos un objeto, usamos la funcion es_una_gema, si lo es,
-vemos si la ultima persona que la tomo es Thanos (con foldObjeto), si tambien se cumple, sumamos 1 a lo que retorna
-Si al final esta funcion retorna 6 gemas, entonces tiene_thanos_todas_las_gemas es True, sino es False-}
 
 tiene_thanos_todas_las_gemas :: Universo -> Bool
 tiene_thanos_todas_las_gemas u = (está_el_personaje "Thanos" u) && (gemas_de_thanos u) == 6
+--Usamos la función está_el_personaje para comprobar que está thanos y además si está vivo, porque la consigna pide que esté el personaje de nombre Thanos
 
 gemas_de_thanos :: Universo -> Int
 gemas_de_thanos u = length (filter (es_una_gema) (objetos_en_posesión_de "Thanos" u))
 
 {-Ejercicio 7-}
-{-Idea: Primero ver que not tiene_thanos_todas_las_gemas, despues usamos 2 auxiliares:
-Una para ver si esta el personaje Thor y ademas el objeto Stormbreaker PREGUNTAR SI DEBE ESTA EN POSESION DE THOR
-Otra para ver si estan los Personajes Wanda y Vision y esta el objeto "Gema de la Mente" y en posesion de Vision
-usando estas 3 funciones, la funcion seria
-(not tiene_thanos_todas_las_gemas) && (auxThor || auxWanda)
-Podemos usar objeto_de_nombre para que nos devuelva Stormbreaker y Gema de la mente yey
-Importante ver que Wanda, Vision y Thor esten vivos en sus respectivos casos-}
 
 podemos_ganarle_a_thanos :: Universo -> Bool
 podemos_ganarle_a_thanos u = (not (tiene_thanos_todas_las_gemas u))  && (estaThor u || wanda_Vision u)
@@ -285,6 +256,7 @@ thor_muerto = Muere thor
 thor_movido_postmortem = Mueve (Muere thor_movido) Sur
 
 thanos = Personaje (-5, 4) "Thanos"
+thanos_muerto = Muere thanos
 
 wanda = Personaje (3, -1) "Wanda"
 wanda_muerta = Muere wanda
@@ -305,20 +277,26 @@ gemaMente_destruida = EsDestruido gemaMente_thanos
 
 gemaHaskell = Objeto (0,0) "Gema de Haskell"
 gemaHaskell_thanos = Tomado gemaHaskell thanos
+gemaHaskell_vision = Tomado gemaHaskell vision
 
 gemaRecursion = Objeto (0, 1) "Gema de Recursion"
 gemaRecursion_thanos = Tomado gemaRecursion thanos
+gemaRecursion_vision = Tomado gemaRecursion vision
 
 gemaProlog = Objeto (1, 0) "Gema de Prolog"
 gemaProlog_thanos = Tomado gemaProlog thanos
+gemaProlog_vision = Tomado gemaProlog vision
 
 gemaJava = Objeto (1, 1) "Gema de Java"
 gemaJava_thanos = Tomado gemaJava thanos
+gemaJava_vision = Tomado gemaJava vision
 
 gemaPython = Objeto (-1, 2) "Gema de Python"
 gemaPython_thanos = Tomado gemaPython thanos
+gemaPython_vision = Tomado gemaPython vision
 
 gemas_thanos = [gemaHaskell_thanos, gemaProlog_thanos, gemaPython_thanos, gemaJava_thanos, gemaRecursion_thanos]
+gemas_vision = [gemaHaskell_vision, gemaProlog_vision, gemaPython_vision, gemaJava_vision, gemaRecursion_vision, gemaMente_vision]
 
 universo_gema_destruida = universo_con [thor, thanos, wanda] (gemas_thanos ++ [gemaMente_destruida])
 
@@ -329,6 +307,7 @@ universo_ganamos_con_todo = universo_con [thor, wanda, thanos, phil, vision] ([g
 universo_perdemos_por_poco = universo_con [thor, wanda, vision_muerto, thanos] ([gemaMente_vision, stormBreaker_destruido_con_thor])
 universo_todo_mal = universo_con [thor_muerto, wanda_muerta, vision, thanos, phil] [stormBreaker_con_thor, gemaMente_vision]
 universo_sin_heroes = universo_con [phil, thanos] gemas_thanos
+universo_gemas_vision = universo_con [thanos, vision, wanda, phil, steve] gemas_vision
 
 testsEj1 = test [ -- Casos de test para el ejercicio 1
   foldPersonaje (\p s -> 0) (\r d -> r+1) (\r -> r+1) phil             -- Caso de test 1 - expresión a testear
@@ -375,7 +354,7 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   posición_personaje phil       
     ~=? (0,0)                   
   ,
-  posición_personaje phil_cuatro_direcciones
+  posición_personaje phil_cuatro_direcciones --Se mueve en todas las direcciones y vuelve al lugar inicial
     ~=? (0,0)
   ,
   posición_personaje thor
@@ -384,10 +363,10 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   posición_personaje thor_movido
     ~=? (2, 1)
   ,
-  posición_personaje thor_muerto
+  posición_personaje thor_muerto --Un personaje que se movio y despues muere
     ~=? (1, 1)
   ,
-  posición_personaje thor_movido_postmortem
+  posición_personaje thor_movido_postmortem --Un personaje que se mueve despues de muerto
     ~=? (2, 0)
   ,
   nombre_objeto gemaHaskell
@@ -416,8 +395,6 @@ testsEj2 = test [ -- Casos de test para el ejercicio 2
   ,
   nombre_objeto stormBreaker_destruido_con_thor --Da el nombre de un objeto destruido y tomado
     ~=? "StormBreaker"
-  --A mi parecer, no tiene mucha utilidad poner muchos test en "nombre_objeto". Es preferible meter mas testeos en fold objeto, por ejemplo.
-
   ]
 
 testsEj3 = test [ -- Casos de test para el ejercicio 3
@@ -480,10 +457,13 @@ testsEj5 = test [ -- Casos de test para el ejercicio 5
     ~=? mjölnir --Donde hay otros mas cercanos, pero no estan libres
   ,
   objeto_libre_mas_cercano steve (universo_con [thanos, thor, steve] [stormBreaker_destruido, mjölnir, gemaMente]) 
-    ~=? mjölnir --Donde hay uno mas cercano pero destruido
+    ~=? mjölnir --Donde hay uno mas cercano pero destruido 
   ]
 
 testsEj6 = test [ -- Casos de test para el ejercicio 6
+  tiene_thanos_todas_las_gemas []
+    ~=? False
+  ,
   tiene_thanos_todas_las_gemas universo_sin_thanos       
     ~=? False                                            
   ,
@@ -491,34 +471,46 @@ testsEj6 = test [ -- Casos de test para el ejercicio 6
     ~=? True
   ,
   tiene_thanos_todas_las_gemas universo_gema_destruida
-    ~=? False
+    ~=? False --Tiene todas las gemas, pero una esta destruida
   ,
   tiene_thanos_todas_las_gemas (universo_con [thor, thanos] [stormBreaker])
-    ~=? False
+    ~=? False --No estan las gemas en el universo
+  ,
+  tiene_thanos_todas_las_gemas universo_gemas_vision
+    ~=? False --Otro personaje tiene todas las gemas
+  ,
+  tiene_thanos_todas_las_gemas (universo_con [thor, thanos_muerto] (gemas_thanos++[gemaMente_thanos]))
+    ~=? False --Thanos tiene todas las gemas pero está muerto
   ]
 
 testsEj7 = test [ -- Casos de test para el ejercicio 7
+  podemos_ganarle_a_thanos []
+    ~=? False
+  ,
   podemos_ganarle_a_thanos universo_sin_thanos         
-    ~=? False                                          
+    ~=? False
   ,
   podemos_ganarle_a_thanos universo_ganamos_con_todo
     ~=? True
   ,
   podemos_ganarle_a_thanos universo_ganamos_thor
-    ~=? True
+    ~=? True --Caso donde ganamos por thor y no por wanda y vision
   ,
   podemos_ganarle_a_thanos universo_ganamos_wandaVision
-    ~=? True
+    ~=? True --Ganamos con Wanda y vision y no con Thor
   ,
   podemos_ganarle_a_thanos universo_perdemos_por_poco
-    ~=? False
+    ~=? False --Vision tiene la gema, pero esta muerto, Stormbreaker esta destruido en posesion de thor
   ,
   podemos_ganarle_a_thanos universo_sin_heroes
     ~=? False --Aunque Phil es mi heroe
   ,
   podemos_ganarle_a_thanos universo_thanos_con_gemas
-    ~=? False
+    ~=? False --Thanos tiene todas las gemas y thor tiene stormbreaker
   ,
   podemos_ganarle_a_thanos universo_todo_mal
-    ~=? False
+    ~=? False --No se cumple ninguna condicion donde se le puede ganar
+  ,
+  podemos_ganarle_a_thanos universo_gemas_vision
+    ~=? True --Vision tiene todas las gemas
   ]
