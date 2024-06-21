@@ -5,6 +5,7 @@
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
+%%fila(+Tam, -F)
 fila(0, []).
 fila(Tam, F) :- Tam >= 0, N1 is Tam-1, fila(N1, F1), append([_], F1, F).
 
@@ -20,11 +21,11 @@ filaOcupada(N, [_ | Xs]) :- N > 0, N1 is N-1, filaOcupada(N1, Xs).
 desde(X, X).
 desde(X, Y) :- N is X+1, desde(N, Y).
 
-%%generarDimensiones(+F, +C, -F1, -C1), paso generate
+%%generarDimensiones(+F, +C, -F1, -C1), paso generate. El minimo es F+C, porque para poder ocupar esa posicion, debe haber al menos tantas filas y columnas como
 generarDimensiones(F, C, F1, C1) :- Min is F+C, desde(Min, S), between(F, S, F1), C1 is S-F1.
 
-%%dimensionesValidas(+F, +C, +F1, +C1), paso test
-dimensionesValidas(F, C, F1, C1) :- F1 >= F, C1 >= C.
+%%dimensionesValidas(+F, +C, +F1, +C1), paso test. F1 >= F+1, porque empezamos a contar en 0 las posiciones y en 1 el tamaño, analogo para las columnas
+dimensionesValidas(F, C, F1, C1) :- F1 >= F+1, C1 >= C+1.
 
 %%crearDimensiones(+F, +C, -F1, -C1)
 crearDimensiones(F, C, F1, C1) :- generarDimensiones(F, C, F1, C1), dimensionesValidas(F, C, F1, C1).
