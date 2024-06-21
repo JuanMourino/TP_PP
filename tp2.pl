@@ -13,7 +13,25 @@ tablero(Filas, Columnas, Tablero) :- Filas > 0, Columnas >= 0, fila(Columnas, F)
 
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
-ocupar(_,_).
+filaOcupada(0, [ocupada | _]).
+filaOcupada(N, [_ | Xs]) :- N > 0, N1 is N-1, filaOcupada(N1, Xs).
+
+%%desde(+X, -Y)
+desde(X, X).
+desde(X, Y) :- N is X+1, desde(N, Y).
+
+%%generarDimensiones(+F, +C, -F1, -C1), paso generate
+generarDimensiones(F, C, F1, C1) :- Min is F+C, desde(Min, S), between(F, S, F1), C1 is S-F1.
+
+%%dimensionesValidas(+F, +C, +F1, +C1), paso test
+dimensionesValidas(F, C, F1, C1) :- F1 >= F, C1 >= C.
+
+%%crearDimensiones(+F, +C, -F1, -C1)
+crearDimensiones(F, C, F1, C1) :- generarDimensiones(F, C, F1, C1), dimensionesValidas(F, C, F1, C1).
+
+ocupar(pos(0, C), T) :- nonvar(T), T = [X | _], filaOcupada(C, X).
+ocupar(pos(F, C), T) :- F > 0, nonvar(T), T = [_ | Xs], F1 is F-1, ocupar(pos(F1, C), Xs).
+ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, T), ocupar(pos(F, C), T).
 
 %% Ejercicio 3
 %% vecino(+Pos, +Tablero, -PosVecino) será verdadero cuando PosVecino sea
