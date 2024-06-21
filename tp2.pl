@@ -5,7 +5,7 @@
 %% Ejercicio 1
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
-%%fila(+Tam, -F)
+%%fila(+Tam, ?F)
 fila(0, []).
 fila(Tam, F) :- Tam >= 0, N1 is Tam-1, fila(N1, F1), append([_], F1, F).
 
@@ -39,7 +39,18 @@ ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, 
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
-vecino(_,_,_).
+
+%%crearPosiciones(+Pos, +Pos1)
+crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X-1, Y1 is Y.
+crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X+1, Y1 is Y.
+crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y-1.
+crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y+1.
+
+%posicionValida(+Pos, +T)
+posicionValida(pos(0, Y), [Z | _]) :- Y >= 0, N is Y+1, fila(N, W), append(W, _, Z).
+posicionValida(pos(X, Y), [_ | Zs]) :- X > 0, N is X-1, posicionValida(pos(N, Y), Zs).
+
+vecino(pos(X, Y), T, pos(X1, Y1)) :- crearPosicion(pos(X, Y), pos(X1, Y1)), posicionValida(pos(X1, Y1), T).
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
