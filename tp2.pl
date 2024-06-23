@@ -111,8 +111,24 @@ camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(In
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
-camino2(_,_,_,_).
+%%insertarOrdenado(X, [], [X]).
+%%insertarOrdenado(X, [Y | Ys], [X, Y | Ys]) :- length(X) <= length(Y).
+%%insertarOrdenado(X, [Y | Ys], [Y | Zs]) :- length(X) > length(Y), insertarOrdenado(X, Ys, Zs).
+%%
+%%isortListas([], _).
+%%isortListas([X | Xs], Ys) :- insertarOrdenado(X, Ys, Zs), isortListas(Xs, Zs)
+%%
+%%menorDistancia([X | _], X).
+%%menorDistancia([_ | Xs], C) :- menorDistancia(Xs, C).
+%%
+%%camino2(Inicio, Fin, T, C) :- bagof(Camino, camino(Inicio, Fin, T, Camino), L), isortListas(), menorDistancia(L1, C).
 
+caminoMin(Inicio, Fin, T, L, C) :- camino(Inicio, Fin, T, C), not(member(C, L)), length(C, Len), not((camino(Inicio, Fin, T, C1), not(member(C1, L)), length(C1, Len1), Len1 < Len)).
+
+camino2Aux(Inicio, Fin, T, L, C) :- caminoMin(Inicio, Fin, T, L, C).
+camino2Aux(Inicio, Fin, T, L, C) :- caminoMin(Inicio, Fin, T, L, C1), append([C1], L, L1), camino2Aux(Inicio, Fin, T, L1, C).
+
+camino2(Inicio, Fin, T, C) :- camino2Aux(Inicio, Fin, T, [], C).
 %% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
 
@@ -120,7 +136,7 @@ camino2(_,_,_,_).
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
 %% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
-caminoOptimo(_,_,_,_).
+caminoOptimo(Inicio, Fin, T, C) :- caminoMin(Inicio, Fin, T, [], C).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
@@ -130,7 +146,7 @@ caminoOptimo(_,_,_,_).
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
 %% sólo por celdas transitables de ambos tableros.
-caminoDual(_,_,_,_,_).
+caminoDual(Inicio, Fin, T1, T2, C) :- camino(Inicio, Fin, T1, C), camino(Inicio, Fin, T2, C).
 
 %%%%%%%%
 %% TESTS
