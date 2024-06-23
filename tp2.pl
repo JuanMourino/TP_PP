@@ -55,7 +55,16 @@ vecino(pos(X, Y), T, pos(X1, Y1)) :- crearPosicion(pos(X, Y), pos(X1, Y1)), posi
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
 %% debe ser una celda transitable (no ocupada) en el Tablero
-vecinoLibre(_,_,_).
+%%posLibreTablero(+Pos, +Tablero)
+posLibreFila(0, [X | _]) :- var(X).
+posLibreFila(0, [X | _]) :- nonvar(X), X \= ocupada.
+posLibreFila(Y, [_ | Zs]) :- N is Y-1, posLibreFila(N, Zs).
+
+%%posLibreTablero(+Pos, +Tablero)
+posLibreTablero(pos(0, Y), [Z | _]) :- posLibreFila(Y, Z).
+posLibreTablero(pos(X, Y), [_ | Zs]) :- X > 0, N is X-1, posLibreTablero(pos(N, Y), Zs).
+
+vecinoLibre(Pos, T, V) :- vecino(Pos, T, V), posLibreTablero(V, T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Definicion de caminos
