@@ -82,9 +82,11 @@ vecinoLibre(Pos, T, V) :- vecino(Pos, T, V), posLibreTablero(V, T).
 %%destinosValidos(+Inicio, +Fin, +T)
 destinosValidos(Inicio, Fin, T) :- posLibreTablero(Fin, T), posLibreTablero(Inicio, T).
 
+%%noPertenece(?X, ?L)
 noPertenece(_, []).
 noPertenece(X, [Y | Ys]) :- X \= Y, noPertenece(X, Ys).
 
+%%caminoAux(+Inicio, +Fin, +Tablero, ?Camino, +Visitados)
 caminoAux(Pos, Pos, T, [Pos], _) :- posLibreTablero(Pos, T).
 caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibre(Inicio, T, V), noPertenece(V, Visitados), append([V], Visitados, Zs), caminoAux(V, Fin, T, Xs, Zs).
 
@@ -92,6 +94,17 @@ camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(In
 
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
+%%
+%% Fin debe estar instanciado para esta implementación porque al llamar posLibreTablero, donde Pos = Fin, es necesario que Fin esté instanciado,
+%% caso contrario hay un error porque al preguntar si X>0 en posLibreTablero, el cual debe estar instanciado para que no halla un error. 
+%% Pasa lo mismo cuando dentro de filaLibre donde, al usar "is", como Y (que viene de Pos) está del lado derecho, debe estar instanciada
+%%
+%% En el caso de Camino, puede estar instanciado, en el caso de que Inicio = Fin, unifica con el primer caso de caminoAux (En cuyo caso es un camino válido)
+%% o no unifica con ningún caso, entonces no era un camino válido
+%% Si Inicio \= Fin, solo puede unificar con el segundo caso de caminoAux, luego al hacer la llamada caminoAux(V, Fin, T, Xs, Zs), o nos encontramos con el caso anterior
+%% o volvemos a entrar al caso recursivo, entonces si este vecino era el siguiente en Camino, entonces unifica y sigue ejecutándose, sino, prueba un caso diferente de vecinoLibre
+%% de Inicio. Si en algún momento no puede unificar con ninguno de los vecinos Libres de Inicio, entonces el Camino era imposible, pues requería que el robot pasara por una
+%% casilla ocupada o que fuera de una casilla a otra que no fuera su casilla vecina.
 
 
 
