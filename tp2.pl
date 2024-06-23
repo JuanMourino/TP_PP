@@ -56,8 +56,8 @@ vecino(pos(X, Y), T, pos(X1, Y1)) :- posicionValida(pos(X, Y), T), crearPosicion
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
 %% debe ser una celda transitable (no ocupada) en el Tablero
 %%posLibreTablero(+Pos, +Tablero)
-posLibreFila(0, [X | _]) :- var(X).
-posLibreFila(0, [X | _]) :- nonvar(X), X \= ocupada.
+posLibreFila(0, [Z | _]) :- var(Z).
+posLibreFila(0, [Z | _]) :- nonvar(Z), Z \= ocupada.
 posLibreFila(Y, [_ | Zs]) :- N is Y-1, posLibreFila(N, Zs).
 
 %%posLibreTablero(+Pos, +Tablero)
@@ -78,7 +78,17 @@ vecinoLibre(Pos, T, V) :- vecino(Pos, T, V), posLibreTablero(V, T).
 %% Notar que la cantidad de caminos es finita y por ende se tiene que poder recorrer
 %% todas las alternativas eventualmente.
 %% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
-camino(_,_,_,_).
+
+%%destinosValidos(+Inicio, +Fin, +T)
+destinosValidos(Inicio, Fin, T) :- posLibreTablero(Fin, T), posLibreTablero(Inicio, T).
+
+noPertenece(_, []).
+noPertenece(X, [Y | Ys]) :- X \= Y, noPertenece(X, Ys).
+
+caminoAux(Pos, Pos, T, [Pos], _) :- posLibreTablero(Pos, T).
+caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibre(Inicio, T, V), noPertenece(V, Visitados), append([V], Visitados, Zs), caminoAux(V, Fin, T, Xs, Zs).
+
+camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(Inicio, Fin, T, Camino, [Inicio]).
 
 %% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
