@@ -92,7 +92,7 @@ caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibr
 
 camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(Inicio, Fin, T, Camino, [Inicio]).
 
-%% 5.1. Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
+%% 5 1 Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
 %% caso por qué el predicado se comporta como lo hace
 %%
 %% Fin debe estar instanciado para esta implementación porque al llamar posLibreTablero, donde Pos = Fin, es necesario que Fin esté instanciado,
@@ -111,32 +111,32 @@ camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(In
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
-%%insertarOrdenado(X, [], [X]).
-%%insertarOrdenado(X, [Y | Ys], [X, Y | Ys]) :- length(X) <= length(Y).
-%%insertarOrdenado(X, [Y | Ys], [Y | Zs]) :- length(X) > length(Y), insertarOrdenado(X, Ys, Zs).
-%%
-%%isortListas([], _).
-%%isortListas([X | Xs], Ys) :- insertarOrdenado(X, Ys, Zs), isortListas(Xs, Zs)
-%%
-%%menorDistancia([X | _], X).
-%%menorDistancia([_ | Xs], C) :- menorDistancia(Xs, C).
-%%
-%%camino2(Inicio, Fin, T, C) :- bagof(Camino, camino(Inicio, Fin, T, Camino), L), isortListas(), menorDistancia(L1, C).
 
-caminoMin(Inicio, Fin, T, L, C) :- camino(Inicio, Fin, T, C), not(member(C, L)), length(C, Len), not((camino(Inicio, Fin, T, C1), not(member(C1, L)), length(C1, Len1), Len1 < Len)).
+%%cantFilas(+T, ?F)
+cantFilas(T, F) :- length(T, F).
 
-camino2Aux(Inicio, Fin, T, L, C) :- caminoMin(Inicio, Fin, T, L, C).
-camino2Aux(Inicio, Fin, T, L, C) :- caminoMin(Inicio, Fin, T, L, C1), append([C1], L, L1), camino2Aux(Inicio, Fin, T, L1, C).
+%%cantColumnas(+T, ?C)
+cantColumnas([X | _], C) :- length(X, C).
+%%Solo vale porque es un tablero
 
-camino2(Inicio, Fin, T, C) :- camino2Aux(Inicio, Fin, T, [], C).
-%% 6.1. Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
+%%distancia(+Inicio, +Fin, ?D)
+distancia(pos(X, Y), pos(X1, Y1), D) :- D is abs(X-X1) + abs(Y-Y1).
+
+camino2(Inicio, Fin, T, C) :- cantFilas(T, Fil), cantColumnas(T, Col), S is Fil*Col, distancia(Inicio, Fin, D), between(D, S, N), camino(Inicio, Fin, T, C), length(C, N).
+%% 6.1 Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
 %% cada caso por qué el predicado se comporta como lo hace.
+%%
+%% Inicio bajo esta implementación debe estar instanciado, pues lo usamos en la función de distancia para instanciar D
+%% usando la posición de Inicio
+%%
+%% Camino puede o no estar instanciado, pues la primera vez que lo usamos es en la función camino, que antes definimos que podía estar instanciado
+%% Despues es usado en length, donde siempre está instanciado.
 
 
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
 %% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
-caminoOptimo(Inicio, Fin, T, C) :- caminoMin(Inicio, Fin, T, [], C).
+caminoOptimo(Inicio, Fin, T, C) :- camino(Inicio, Fin, T, C), length(C, Len), not((camino(Inicio, Fin, T, C1), length(C1, Len1), Len1 < Len)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
@@ -152,17 +152,48 @@ caminoDual(Inicio, Fin, T1, T2, C) :- camino(Inicio, Fin, T1, C), camino(Inicio,
 %% TESTS
 %%%%%%%%
 
-cantidadTestsTablero(2). % Actualizar con la cantidad de tests que entreguen
+%%Tableros
+tableros(ocupado2x2, T) :- tablero(2, 2, T), ocupar(pos(0, 0), T), ocupar(pos(1, 1), T).
+tableros(ocupado3x3, T) :- tablero(3, 3, T), ocupar(pos(0, 0), T), ocupar(pos(1, 1), T).
+tableros(sinCamino00, T) :- tablero(4, 4, T), ocupar(pos(1, 0), T), ocupar(pos(0, 1), T).
+
+cantidadTestsTablero(4). % Actualizar con la cantidad de tests que entreguen
 testTablero(1) :- tablero(0,0,[]).
 testTablero(2) :- ocupar(pos(0,0), [[ocupada]]).
 % Agregar más tests
+testTablero(3) :- tablero(50, 50, T), length(T, 50), cantColumnas(T, 50).
+testTablero(4) :- tableros(ocupado3x3, T), T = [[X1, X2, X3],
+                                                [Y1, Y2, Y3],
+                                                [Z1, Z2, Z3]],
+    nonvar(X1), nonvar(Y2), var(X2), var(X3), var(Y1), var(Y3), var(Z1), var(Z2), var(Z3).
 
-cantidadTestsVecino(1). % Actualizar con la cantidad de tests que entreguen
+
+
+cantidadTestsVecino(5). % Actualizar con la cantidad de tests que entreguen
 testVecino(1) :- vecino(pos(0,0), [[_,_]], pos(0,1)).
 % Agregar más tests
+testVecino(2) :- tableros(ocupado3x3, T), setof(V, vecino(pos(1, 1), T, V), L), L = [pos(0, 1), pos(1, 0), pos(1, 2), pos(2, 1)].
+testVecino(3) :- tableros(ocupado3x3, T), setof(V, vecinoLibre(pos(1, 1), T, V), L), L = [pos(0, 1), pos(1, 0), pos(1, 2), pos(2, 1)].
+testVecino(4) :- tableros(ocupado3x3, T), bagof(V, vecinoLibre(pos(0,1), T, V), B), B = [pos(0, 2)].
+testVecino(5) :- tableros(ocupado2x2, T), not(vecinoLibre(pos(0, 1), T, _)).
 
-cantidadTestsCamino(0). % Actualizar con la cantidad de tests que entreguen
+
+cantidadTestsCamino(7). % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
+testCamino(1) :- tableros(sinCamino00, T), not(camino(pos(0, 0), pos(1, 2), T, _)).
+testCamino(2) :- tableros(sinCamino00, T), not(camino(pos(1, 2), pos(0, 1), T, _)).
+testCamino(3) :- tableros(ocupado3x3, T), not(camino(pos(1, 1), pos(0, 1), T, _)).
+testCamino(4) :- tablero(3, 3, T), not(camino(pos(1, 1), pos(3, 1), T, _)).
+testCamino(5) :- tablero(3, 3, T), not(camino(pos(1, -3), pos(1, 1), T, _)).
+testCamino(6) :- tablero(3, 3, T), bagof(C, camino2(pos(0, 2), pos(2, 0), T, C), B), tamanoCreciente(B).
+testCamino(7) :- tablero(4, 4, T), bagof(C, camino2(pos(0, 1), pos(2, 0), T, C), B), sinRepetidos(B).
+
+sinRepetidos([]).
+sinRepetidos([X | Xs]) :- sinRepetidos(Xs), not(member(X, Xs)).
+
+tamanoCreciente([]).
+tamanoCreciente([_]).
+tamanoCreciente([X, Y | Xs]) :- length(X, Lenx), length(Y, Leny), Lenx =< Leny, tamanoCreciente([Y | Xs]).
 
 cantidadTestsCaminoOptimo(0). % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
