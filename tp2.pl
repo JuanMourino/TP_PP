@@ -47,8 +47,8 @@ crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y-1.
 crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y+1.
 
 %posicionValida(+Pos, +T)
-posicionValida(pos(0, Y), [Z | _]) :- Y >= 0, N is Y+1, fila(N, W), append(W, _, Z).
-posicionValida(pos(X, Y), [_ | Zs]) :- X > 0, N is X-1, posicionValida(pos(N, Y), Zs).
+%Solo vale porque es un tablero, si no fueran todas las filas iguales, habría que ir a la fila X para comprobar que Y es válido
+posicionValida(pos(X, Y), [Z | Zs]) :- length(Z, C), length([Z | Zs], F), 0 =< X, 0 =< Y, X < F, Y < C.
 
 vecino(pos(X, Y), T, pos(X1, Y1)) :- posicionValida(pos(X, Y), T), crearPosicion(pos(X, Y), pos(X1, Y1)), posicionValida(pos(X1, Y1), T).
 
