@@ -165,7 +165,7 @@ testTablero(3) :- tablero(50, 50, T), length(T, 50), cantColumnas(T, 50).
 testTablero(4) :- tableros(ocupado3x3, T), T = [[X1, X2, X3],
                                                 [Y1, Y2, Y3],
                                                 [Z1, Z2, Z3]],
-    nonvar(X1), nonvar(Y2), var(X2), var(X3), var(Y1), var(Y3), var(Z1), var(Z2), var(Z3).
+    nonvar(X1), X1 = ocupada, nonvar(Y2), Y2 = ocupada, var(X2), var(X3), var(Y1), var(Y3), var(Z1), var(Z2), var(Z3).
 
 
 
