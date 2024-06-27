@@ -156,6 +156,7 @@ caminoDual(Inicio, Fin, T1, T2, C) :- camino(Inicio, Fin, T1, C), camino(Inicio,
 tableros(ocupado2x2, T) :- tablero(2, 2, T), ocupar(pos(0, 0), T), ocupar(pos(1, 1), T).
 tableros(ocupado3x3, T) :- tablero(3, 3, T), ocupar(pos(0, 0), T), ocupar(pos(1, 1), T).
 tableros(sinCamino00, T) :- tablero(4, 4, T), ocupar(pos(1, 0), T), ocupar(pos(0, 1), T).
+tableros(ocupado5x5, T) :- tablero(5, 5, T), ocupar(pos(2, 1), T).
 
 cantidadTestsTablero(4). % Actualizar con la cantidad de tests que entreguen
 testTablero(1) :- tablero(0,0,[]).
@@ -195,11 +196,16 @@ tamanoCreciente([]).
 tamanoCreciente([_]).
 tamanoCreciente([X, Y | Xs]) :- length(X, Lenx), length(Y, Leny), Lenx =< Leny, tamanoCreciente([Y | Xs]).
 
-cantidadTestsCaminoOptimo(0). % Actualizar con la cantidad de tests que entreguen
+cantidadTestsCaminoOptimo(4) % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
+testCaminoOptimo(1) :- tablero(3, 3, T), bagof(C, caminoOptimo(pos(0, 2), pos(2, 0), T, C), B), sinRepetidos(L), length(B, 4).
+testCaminoOptimo(2) :- tablero(5, 5, T), caminoOptimo(pos(0, 4), pos(4, 2), T, Co), length(Co, Leno), forall(camino(pos(0, 4), pos(4, 2), T, C), len(C, Len1), Leno < Len1).
+testCaminoOptimo(3) :- tableros(ocupado5x5, T), not(caminoOptimo(pos(0, 0), pos(2, 1), T, C)).
+testCaminoOptimo(4) :- tablero(5, 5, T), bagof(C, caminoOptimo(pos(0, 0), pos(0, 4), T, C), B), B = [[pos(0, 0), pos(0, 1), pos(0, 2), pos(0, 3), pos(0, 4)]].
 
 cantidadTestsCaminoDual(0). % Actualizar con la cantidad de tests que entreguen
 % Agregar más tests
+
 
 tests(tablero) :- cantidadTestsTablero(M), forall(between(1,M,N), testTablero(N)).
 tests(vecino) :- cantidadTestsVecino(M), forall(between(1,M,N), testVecino(N)).
