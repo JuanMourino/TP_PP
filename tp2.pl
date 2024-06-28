@@ -24,7 +24,7 @@ generarDimensiones(F, C, F1, C1) :- Min is F+C, desde(Min, S), between(F, S, F1)
 %%dimensionesValidas(+F, +C, +F1, +C1), paso test. F1 >= F+1, porque empezamos a contar en 0 las posiciones y en 1 el tamaño, analogo para las columnas
 dimensionesValidas(F, C, F1, C1) :- F1 >= F+1, C1 >= C+1.
 
-%%crearDimensiones(+F, +C, -F1, -C1)
+%%crearDimensiones(+F, +C, -F1, -C1) Usa generate & test, genera un par de dimensiones posibles y despues verifica que sean validas
 crearDimensiones(F, C, F1, C1) :- generarDimensiones(F, C, F1, C1), dimensionesValidas(F, C, F1, C1).
 
 %%crearPosiciones(+Pos, +Pos1)
@@ -60,6 +60,7 @@ cantColumnas([X | _], C) :- length(X, C).
 distancia(pos(X, Y), pos(X1, Y1), D) :- D is abs(X-X1) + abs(Y-Y1).
 
 %%caminoAux(+Inicio, +Fin, +Tablero, ?Camino, +Visitados)
+%%Usa generate & test, genera un posible vecino libre y despues verifica que sea posible armar un camino agregando esa posicion
 caminoAux(Pos, Pos, T, [Pos], _) :- posLibreTablero(Pos, T).
 caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibre(Inicio, T, V), not(member(V, Visitados)), append([V], Visitados, Zs), caminoAux(V, Fin, T, Xs, Zs).
 
@@ -84,6 +85,7 @@ tablero(Filas, Columnas, Tablero) :- Filas > 0, Columnas >= 0, fila(Columnas, F)
 
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
+%% Usa generate & test con crearDimensiones
 ocupar(pos(0, C), T) :- nonvar(T), T = [X | _], filaOcupada(C, X).
 ocupar(pos(F, C), T) :- F > 0, nonvar(T), T = [_ | Xs], F1 is F-1, ocupar(pos(F1, C), Xs).
 ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, T), ocupar(pos(F, C), T).
@@ -93,11 +95,13 @@ ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, 
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
+%%Usa generate & test, genera una posible posicion con crearPosicion y prueba que sea valida con posicionValida
 vecino(pos(X, Y), T, pos(X1, Y1)) :- posicionValida(pos(X, Y), T), crearPosicion(pos(X, Y), pos(X1, Y1)), posicionValida(pos(X1, Y1), T).
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
 %% debe ser una celda transitable (no ocupada) en el Tablero
+%% Usa generate & test, porque genera un vecino posible con vecino y prueba que sea solucion valida con posLibreTablero
 vecinoLibre(Pos, T, V) :- vecino(Pos, T, V), posLibreTablero(V, T).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -112,6 +116,7 @@ vecinoLibre(Pos, T, V) :- vecino(Pos, T, V), posLibreTablero(V, T).
 %% Notar que la cantidad de caminos es finita y por ende se tiene que poder recorrer
 %% todas las alternativas eventualmente.
 %% Consejo: Utilizar una lista auxiliar con las posiciones visitadas
+%%caminoAux usa generate & test
 camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(Inicio, Fin, T, Camino, [Inicio]).
 
 %% 5 1 Analizar la reversibilidad de los parámetros Fin y Camino justificando adecuadamente en cada
@@ -131,6 +136,7 @@ camino(Inicio, Fin, T, Camino) :-  destinosValidos(Inicio, Fin, T), caminoAux(In
 %% Ejercicio 6
 %% camino2(+Inicio, +Fin, +Tablero, -Camino) ídem camino/4 pero que las soluciones
 %% se instancien en orden creciente de longitud.
+%% Usa generate & test porque primero genera un camino posible y despues ve si cumple el tamaño pedido
 camino2(Inicio, Fin, T, C) :- cantFilas(T, Fil), cantColumnas(T, Col), S is Fil*Col, distancia(Inicio, Fin, D), between(D, S, N), camino(Inicio, Fin, T, C), length(C, N).
 
 %% 6.1 Analizar la reversibilidad de los parámetros Inicio y Camino justificando adecuadamente en
@@ -146,6 +152,7 @@ camino2(Inicio, Fin, T, C) :- cantFilas(T, Fil), cantColumnas(T, Col), S is Fil*
 %% Ejercicio 7
 %% caminoOptimo(+Inicio, +Fin, +Tablero, -Camino) será verdadero cuando Camino sea un
 %% camino óptimo sobre Tablero entre Inicio y Fin. Notar que puede no ser único.
+%% Usa generate & test porque genera un camino posible y despues ve que tenga menor longitud a todos los demas caminos
 caminoOptimo(Inicio, Fin, T, C) :- camino(Inicio, Fin, T, C), length(C, Len), not((camino(Inicio, Fin, T, C1), length(C1, Len1), Len1 < Len)).
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -156,6 +163,7 @@ caminoOptimo(Inicio, Fin, T, C) :- camino(Inicio, Fin, T, C), length(C, Len), no
 %% caminoDual(+Inicio, +Fin, +Tablero1, +Tablero2, -Camino) será verdadero
 %% cuando Camino sea un camino desde Inicio hasta Fin pasando al mismo tiempo
 %% sólo por celdas transitables de ambos tableros.
+%% Usa generate & test porque genera un camino del primer tablero y despues ve si es posible en el segundo tablero
 caminoDual(Inicio, Fin, T1, T2, C) :- camino(Inicio, Fin, T1, C), todasPosLibres(T2, C).
 
 
