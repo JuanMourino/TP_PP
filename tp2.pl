@@ -8,11 +8,11 @@
 
 %%fila(+Tam, ?F)
 fila(0, []).
-fila(Tam, F) :- Tam >= 0, N1 is Tam-1, fila(N1, F1), append([_], F1, F).
+fila(Tam, [_ | F1]) :- Tam > 0, N1 is Tam-1, fila(N1, F1).
 
-%% filaOcupada(+N, +T)
-filaOcupada(0, [ocupada | _]).
-filaOcupada(N, [_ | Xs]) :- N > 0, N1 is N-1, filaOcupada(N1, Xs).
+%%ocupadaEnFila(+N, +T)
+ocupadaEnFila(0, [ocupada | _]).
+ocupadaEnFila(N, [_ | Xs]) :- N > 0, N1 is N-1, ocupadaEnFila(N1, Xs).
 
 %%desde(+X, -Y)
 desde(X, X).
@@ -27,11 +27,11 @@ dimensionesValidas(F, C, F1, C1) :- F1 >= F+1, C1 >= C+1.
 %%crearDimensiones(+F, +C, -F1, -C1) Usa generate & test, genera un par de dimensiones posibles y despues verifica que sean validas
 crearDimensiones(F, C, F1, C1) :- generarDimensiones(F, C, F1, C1), dimensionesValidas(F, C, F1, C1).
 
-%%crearPosiciones(+Pos, +Pos1)
-crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X-1, Y1 is Y.
-crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X+1, Y1 is Y.
-crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y-1.
-crearPosicion(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y+1.
+%%sonVecinos(+Pos, ?Pos1)
+sonVecinos(pos(X, Y), pos(X1, Y1)) :- X1 is X-1, Y1 is Y.
+sonVecinos(pos(X, Y), pos(X1, Y1)) :- X1 is X+1, Y1 is Y.
+sonVecinos(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y-1.
+sonVecinos(pos(X, Y), pos(X1, Y1)) :- X1 is X, Y1 is Y+1.
 
 %posicionValida(+Pos, +T)
 %Solo vale porque es un tablero, si no fueran todas las filas iguales, habría que ir a la fila X para comprobar que Y es válido
@@ -40,7 +40,7 @@ posicionValida(pos(X, Y), [Z | Zs]) :- length(Z, C), length([Z | Zs], F), 0 =< X
 %%posLibreFila(+Pos, +Tablero)
 posLibreFila(0, [Z | _]) :- var(Z).
 posLibreFila(0, [Z | _]) :- nonvar(Z), Z \= ocupada.
-posLibreFila(Y, [_ | Zs]) :- N is Y-1, posLibreFila(N, Zs).
+posLibreFila(Y, [_ | Zs]) :- Y > 0, N is Y-1, posLibreFila(N, Zs).
 
 %%posLibreTablero(+Pos, +Tablero)
 posLibreTablero(pos(0, Y), [Z | _]) :- posLibreFila(Y, Z).
@@ -62,7 +62,7 @@ distancia(pos(X, Y), pos(X1, Y1), D) :- D is abs(X-X1) + abs(Y-Y1).
 %%caminoAux(+Inicio, +Fin, +Tablero, ?Camino, +Visitados)
 %%Usa generate & test, genera un posible vecino libre y despues verifica que sea posible armar un camino agregando esa posicion
 caminoAux(Pos, Pos, T, [Pos], _) :- posLibreTablero(Pos, T).
-caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibre(Inicio, T, V), not(member(V, Visitados)), append([V], Visitados, Zs), caminoAux(V, Fin, T, Xs, Zs).
+caminoAux(Inicio, Fin, T, [Inicio | Xs], Visitados) :- Inicio \= Fin, vecinoLibre(Inicio, T, V), not(member(V, Visitados)), caminoAux(V, Fin, T, Xs, [V | Visitados]).
 
 %% todasPosLibres(+T, +C)
 todasPosLibres(_, []).
@@ -81,12 +81,12 @@ tamanoCreciente([X, Y | Xs]) :- length(X, Lenx), length(Y, Leny), Lenx =< Leny, 
 %% tablero(+Filas,+Columnas,-Tablero) instancia una estructura de tablero en blanco
 %% de Filas x Columnas, con todas las celdas libres.
 tablero(0,C,[]) :- C >= 0.
-tablero(Filas, Columnas, Tablero) :- Filas > 0, Columnas >= 0, fila(Columnas, F), Filas1 is Filas-1, tablero(Filas1, Columnas, T1), append([F], T1, Tablero).
+tablero(Filas, Columnas, [F | T1]) :- Filas > 0, Columnas >= 0, fila(Columnas, F), Filas1 is Filas-1, tablero(Filas1, Columnas, T1).
 
 %% Ejercicio 2
 %% ocupar(+Pos,?Tablero) será verdadero cuando la posición indicada esté ocupada.
 %% Usa generate & test con crearDimensiones
-ocupar(pos(0, C), T) :- nonvar(T), T = [X | _], filaOcupada(C, X).
+ocupar(pos(0, C), T) :- nonvar(T), T = [X | _], ocupadaEnFila(C, X).
 ocupar(pos(F, C), T) :- F > 0, nonvar(T), T = [_ | Xs], F1 is F-1, ocupar(pos(F1, C), Xs).
 ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, T), ocupar(pos(F, C), T).
 
@@ -95,8 +95,8 @@ ocupar(pos(F, C), T) :- var(T), crearDimensiones(F, C, F1, C1), tablero(F1, C1, 
 %% un átomo de la forma pos(F', C') y pos(F',C') sea una celda contigua a
 %% pos(F,C), donde Pos=pos(F,C). Las celdas contiguas puede ser a lo sumo cuatro
 %% dado que el robot se moverá en forma ortogonal.
-%%Usa generate & test, genera una posible posicion con crearPosicion y prueba que sea valida con posicionValida
-vecino(pos(X, Y), T, pos(X1, Y1)) :- posicionValida(pos(X, Y), T), crearPosicion(pos(X, Y), pos(X1, Y1)), posicionValida(pos(X1, Y1), T).
+%%Usa generate & test, genera una posible posicion con sonVecinos y prueba que sea valida con posicionValida
+vecino(pos(X, Y), T, pos(X1, Y1)) :- posicionValida(pos(X, Y), T), sonVecinos(pos(X, Y), pos(X1, Y1)), posicionValida(pos(X1, Y1), T).
 
 %% Ejercicio 4
 %% vecinoLibre(+Pos, +Tablero, -PosVecino) idem vecino/3 pero además PosVecino
